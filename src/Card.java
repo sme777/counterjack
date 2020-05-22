@@ -1,8 +1,8 @@
 public class Card {
 
-    public Card(String suit, String name) {
+    public Card(String suit, String face) {
         _suit = suit;
-        _face = name;
+        _face = face;
 
     }
 

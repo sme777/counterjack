@@ -6,19 +6,20 @@ public class AI extends Player{
         _doubleAfterSplit = doubleAfterSplit;
     }
 
-    @Override
-    public void move() throws Exception {
+    public void move() {
         if (_dealer.size() == 0) {
-            throw new Exception();
-        }
-        if (_ai.size() == 2 && _ai.get(0) == _ai.get(1)) {
+            System.out.println("Wait till your turn!");
+        } else if (_ai.size() == 2 && _ai.get(0) == _ai.get(1)) {
             splitHelper();
-        } else if (_ai.size() == 2 && _ai.contains(new Card("H", "A")) || _ai.contains(new Card("C", "A"))
-                || _ai.contains(new Card("D", "A")) || _ai.contains(new Card("S", "A"))) {
+        } else if (_ai.size() == 2 && (_ai.contains(new Card("H", "A")) || _ai.contains(new Card("C", "A"))
+                || _ai.contains(new Card("D", "A")) || _ai.contains(new Card("S", "A")))) {
             softHelper();
         } else {
             hardHelper();
         }
+    }
+    public void addDealerCard(Card c) {
+        _dealer.add(c);
     }
 
     public void addCard(Card c) {
@@ -34,7 +35,7 @@ public class AI extends Player{
         _dealer.removeAll(_ai);
     }
 
-    private void splitHelper() throws Exception{
+    private void splitHelper() {
         if (_ai.get(0).getFace().equals("A")) {
             split();
         } else if (_ai.get(0).getFace().equals("K") || _ai.get(0).getFace().equals("Q")
@@ -108,11 +109,11 @@ public class AI extends Player{
                 notSplit();
             }
         } else {
-            throw new Exception();
+            System.out.println("Wrong config.");
         }
     }
 
-    private void softHelper() throws Exception{
+    private void softHelper() {
         if (_ai.size() == 2) {
             if (aiComparator("9", 0) || aiComparator("9", 1)) {
                 stand();
@@ -163,7 +164,7 @@ public class AI extends Player{
                     hit();
                 }
             } else {
-                throw new Exception();
+                System.out.println("Another wrong conflict");
             }
         }
     }
@@ -265,6 +266,6 @@ public class AI extends Player{
 
 
     private Boolean _doubleAfterSplit;
-    private ArrayList<Card> _dealer;
-    private ArrayList<Card> _ai;
+    private ArrayList<Card> _dealer = new ArrayList<>();
+    private ArrayList<Card> _ai = new ArrayList<>();
 }

@@ -19,26 +19,32 @@ public class Player {
     }
 
     public String hit() {
+        System.out.println("Hit");
         return "hit";
     }
 
     public String split() {
+        System.out.println("Split");
         return "split";
     }
 
     public String doubleHand() {
+        System.out.println("Double");
         return "double";
     }
 
     public String stand() {
+        System.out.println("Stand");
         return "stand";
     }
 
     public String notSplit() {
+        System.out.println("Don't Split");
         return "notsplit";
     }
 
     public String surrender() {
+        System.out.println("Surrender");
         return "surrender";
     }
 

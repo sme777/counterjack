@@ -6,12 +6,14 @@ public class Dealer extends Player{
         _dealer = new ArrayList<>();
     }
 
-    @Override
-    public void move() throws Exception {
-        if (handSum() < 17) {
-            hit();
-        } else {
-            stand();
+    public void move() {
+        _numberOfCards++;
+        if (_numberOfCards > 1) {
+            if (handSum() < 17) {
+                hit();
+            } else {
+                stand();
+            }
         }
     }
 
@@ -41,5 +43,6 @@ public class Dealer extends Player{
         }
         return sum;
     }
+    private int _numberOfCards = 0;
     private ArrayList<Card> _dealer;
 }

@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Game {
 
@@ -7,17 +9,36 @@ public class Game {
         _deck = deck;
         _gameDeck = deck.getRandomDeck();
         _turn = true;
+        AI sampleAI = new AI(true);
+        Player samplePlayer = new Player();
+        _ais.add(sampleAI);
+        _players.add(samplePlayer);
+        _dealer = new Dealer();
+
+        _gameTree.add(samplePlayer);
+        _gameTree.add(sampleAI);
+        _gameTree.add(_dealer);
+
         subtractCards();
         adderCards();
     }
 
-    public Game(Deck deck, ArrayList<AI> ais, ArrayList<Player> players, Dealer dealer) {
+    public Game(Deck deck, int ais, int players) {
         _deck = deck;
         _gameDeck = deck.getRandomDeck();
         _turn = true;
-        _players = players;
-        _ais = ais;
-        _dealer = dealer;
+        while (ais > 0) {
+            AI sampleAI = new AI(true);
+            _ais.add(sampleAI);
+            ais--;
+        }
+        while (players > 0) {
+            Player samplePlayer = new Player();
+            _players.add(samplePlayer);
+            players--;
+        }
+
+        _dealer = new Dealer();
     }
 
     public Card dealOne() {
@@ -29,6 +50,31 @@ public class Game {
         _gameDeck.remove(0);
         System.out.println(_dealingCard);
         _currentTableCards.add(_dealingCard);
+        if (!_turn) {
+            Player ply = _gameTree.pop();
+            _gameTree.add(ply);
+            if (ply instanceof AI) {
+                AI aiPlayer = (AI) ply;
+                aiPlayer.addCard(_dealingCard);
+                if (_dealerCard != null) {
+                    aiPlayer.addDealerCard(_dealingCard);
+                    _dealerCard = null;
+                }
+                aiPlayer.move();
+            } else if (ply instanceof Dealer){
+                Dealer dealer = (Dealer) ply;
+                _dealerCard = _dealingCard;
+                dealer.move();
+            }
+            if (!(_gameTree.getFirst() instanceof AI || _gameTree.getFirst() instanceof Dealer)) {
+                _turn = !_turn;
+            }
+        }  else {
+            System.out.println("Player turn: ");
+            Player ply = _gameTree.pop();
+            _gameTree.add(ply);
+            _turn = !_turn;
+        }
         return _dealingCard;
 
     }
@@ -61,17 +107,19 @@ public class Game {
         _subtractOneCards.addAll(Arrays.asList(cards));
     }
 
-
+    private LinkedList<Player> _gameTree = new LinkedList<>();
     private ArrayList<Card> _currentTableCards = new ArrayList<>();
-    private ArrayList<Player> _players;
-    private ArrayList<AI> _ais;
+    private ArrayList<Player> _players = new ArrayList<>();
+    private ArrayList<AI> _ais = new ArrayList<>();
     private ArrayList<String> _addOneCards = new ArrayList<>();
     private ArrayList<String> _subtractOneCards = new ArrayList<>();
+
 
     private Dealer _dealer;
     private Boolean _turn;
     private Card _dealingCard;
     private ArrayList<Card> _gameDeck;
+    private Card _dealerCard;
     private Deck _deck;
     private int count = 0;
 }
