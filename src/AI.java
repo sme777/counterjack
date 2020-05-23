@@ -2,10 +2,14 @@ import java.util.ArrayList;
 
 public class AI extends Player{
 
+    /** Constructor of AI.
+     * @param doubleAfterSplit configure
+     * if double after split is allowed. **/
     public AI(Boolean doubleAfterSplit) {
         _doubleAfterSplit = doubleAfterSplit;
     }
 
+    /** The move the AI will make based on the heuristics of perfect startegy. **/
     public void move() {
         if (_dealer.size() == 0) {
             System.out.println("Wait till your turn!");
@@ -13,28 +17,44 @@ public class AI extends Player{
             splitHelper();
         } else if (_ai.size() == 2 && (_ai.contains(new Card("H", "A")) || _ai.contains(new Card("C", "A"))
                 || _ai.contains(new Card("D", "A")) || _ai.contains(new Card("S", "A")))) {
-            softHelper();
+            if (!surrenderHelper()) {
+                softHelper();
+            }
         } else {
-            hardHelper();
+            if (!surrenderHelper()) {
+                hardHelper();
+            }
         }
     }
+
+    /** Adds a new card to the hand of the Dealer.
+     * Occurs when a card is dealt to the Dealer.
+     * @param c the given card needed to be added.**/
     public void addDealerCard(Card c) {
         _dealer.add(c);
     }
 
+    /** Adds a new card to the hand of the AI.
+     * Occurs when a card is dealt to the AI.
+     * @param c the given card needed to be added.**/
     public void addCard(Card c) {
         _ai.add(c);
     }
 
+    /** Removes a specific card. Occurs during splits.
+     * @param c the given card needed to be removed. **/
     public void removeCard(Card c) {
         _ai.remove(c);
     }
 
+    /** Removes all dealer and AI cards. Occurs at each new hand.**/
     public void removeAll() {
         _ai.removeAll(_ai);
         _dealer.removeAll(_ai);
     }
 
+    /** Configures whether the hand needs to be split.
+     *  Calls necessary functions based on perfect strategy. **/
     private void splitHelper() {
         if (_ai.get(0).getFace().equals("A")) {
             split();
@@ -113,6 +133,9 @@ public class AI extends Player{
         }
     }
 
+    /** Configures the correct move based on the sum of hand
+     * based on the fact that the hand is soft. Calls the necessary
+     * function based on perfect strategy. **/
     private void softHelper() {
         if (_ai.size() == 2) {
             if (aiComparator("9", 0) || aiComparator("9", 1)) {
@@ -169,6 +192,9 @@ public class AI extends Player{
         }
     }
 
+    /** Configures the correct move based on the sum of hand
+     * based on the fact that the hand is hard. Calls the necessary
+     * function based on perfect strategy. **/
     private void hardHelper() {
         int handCount = handSum(_ai);
         if (handCount == 17) {
@@ -237,10 +263,32 @@ public class AI extends Player{
         }
     }
 
+    /** Configures if AI should surrender.
+     * @return true if needs to surrender. **/
+    private Boolean surrenderHelper() {
+        int handCount = handSum(_ai);
+        if (handCount == 16 && (dealerComparator("9") || dealerComparator("10")
+                || dealerComparator("J") || dealerComparator("Q")
+                || dealerComparator("K") || dealerComparator("A"))) {
+            surrender();
+            return true;
+        } else if (handCount == 15 && (dealerComparator("10")
+                || dealerComparator("J") || dealerComparator("Q")
+                || dealerComparator("K"))) {
+            surrender();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void configureDestination() {
 
     }
 
+    /** Calculates the sum of the current hand.
+     * @param array a given array list
+     * @return value of hand sum. **/
     private int handSum(ArrayList<Card> array) {
         int sum = 0;
         for (Card card : array) {
@@ -256,16 +304,23 @@ public class AI extends Player{
         return sum;
     }
 
+    /** Compares the value of a card to that of the dealer.
+     * @param k the string value of the given card.  **/
     private Boolean dealerComparator(String k) {
         return _dealer.get(0).getFace().equals(k);
     }
-
+    /** Compares the value of a card to a value of a
+     * card in the hand at a specific index.
+     * @param index of the card,
+     * @param k the string value of the card **/
     private Boolean aiComparator(String k, int index) {
         return _ai.get(index).getFace().equals(k);
     }
 
-
+    /** A given game parameter, by default is true. **/
     private Boolean _doubleAfterSplit;
+    /** A list of dealer cards. Logic is made from the first card only. **/
     private ArrayList<Card> _dealer = new ArrayList<>();
+    /** A list of AI cards at the table. **/
     private ArrayList<Card> _ai = new ArrayList<>();
 }

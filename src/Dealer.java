@@ -2,10 +2,14 @@ import java.util.ArrayList;
 
 public class Dealer extends Player{
 
+    /** Constructs a new Dealer. **/
     public Dealer() {
         _dealer = new ArrayList<>();
     }
 
+    /** Initialize a dealer move. Occurs when
+     *  other players have gone bust or chose
+     *  to stand/surrender the hand. **/
     public void move() {
         _numberOfCards++;
         if (_numberOfCards > 1) {
@@ -17,14 +21,20 @@ public class Dealer extends Player{
         }
     }
 
+    /** Adds a ard to the Dealers hand.
+     * @param c is the given card to be added. **/
     public void addCard(Card c) {
         _dealer.add(c);
     }
 
+    /** Removes all cards from the dealers hand.
+     * Occurs at the end of each hand. **/
     public void removeAll() {
         _dealer.removeAll(_dealer);
     }
 
+    /** Calculates the sum of current hand.
+     * @return the sum of the hand. **/
     private int handSum() {
         int sum = 0;
         for (Card card : _dealer) {
@@ -43,6 +53,9 @@ public class Dealer extends Player{
         }
         return sum;
     }
+
+    /** Number of cards a dealer has, initialized at 0.**/
     private int _numberOfCards = 0;
+    /** A list of dealers Cards. **/
     private ArrayList<Card> _dealer;
 }
