@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.*;
 
 public class Game {
 
@@ -21,10 +19,13 @@ public class Game {
         _gameTree.add(sampleAI);
         _gameTree.add(_dealer);
 
+        _playerStands.put(sampleAI, "hit");
+        _playerStands.put(samplePlayer, "hit");
+        _playerStands.put(_dealer, "hit");
         subtractCards();
         adderCards();
     }
-    
+
     /** Constructs a new Game with different inputs.
      * @param deck the supplied game deck.
      * @param ais number of AIs.
@@ -36,15 +37,35 @@ public class Game {
         while (ais > 0) {
             AI sampleAI = new AI(true);
             _ais.add(sampleAI);
+            _playerStands.put(sampleAI, "hit");
             ais--;
         }
         while (players > 0) {
             Player samplePlayer = new Player();
             _players.add(samplePlayer);
+            _playerStands.put(samplePlayer, "hit");
             players--;
-        }
 
+        }
         _dealer = new Dealer();
+        _playerStands.put(_dealer, "hit");
+    }
+
+    public void startGame() {
+        for (int i = 0; i < _players.size(); i++) {
+            while (!(_playerStands.get(_players.get(i)).equals(_stand)
+                    || _playerStands.get(_players.get(i)).equals(_bust)
+                    || _playerStands.get(_players.get(i)).equals(_surrender))) {
+                dealOne();
+            }
+
+            while (!(_playerStands.get(_ais.get(i)).equals(_stand)
+                    || _playerStands.get(_ais.get(i)).equals(_bust)
+                    || _playerStands.get(_ais.get(i)).equals(_surrender))) {
+                dealOne();
+            }
+        }
+        dealRest();
     }
 
     /** Deals one card to the current player. Saves the drawn card to the
@@ -56,37 +77,129 @@ public class Game {
             System.out.println("An Error Occurred.");
         }
 
-        _drawingCard = _gameDeck.get(0);
-        _gameDeck.remove(0);
-        System.out.println(_drawingCard);
-        _currentTableCards.add(_drawingCard);
         if (!_turn) {
+            round++;
             Player ply = _gameTree.pop();
             _gameTree.add(ply);
             if (ply instanceof AI) {
                 AI aiPlayer = (AI) ply;
-                aiPlayer.addCard(_drawingCard);
-                if (_dealerCard != null) {
-                    aiPlayer.addDealerCard(_dealerCard);
-                    _dealerCard = null;
+                if (!(_playerStands.get(aiPlayer).equals(_stand)
+                        || _playerStands.get(aiPlayer).equals(_surrender)
+                        || _playerStands.get(aiPlayer).equals(_bust))) {
+                    _drawingCard = _gameDeck.get(0);
+                    _gameDeck.remove(0);
+                    System.out.println(ply.toString() + _drawingCard);
+                    _currentTableCards.add(_drawingCard);
+
+
+                    aiPlayer.addCard(_drawingCard);
+                    if (_dealerCard != null) {
+                        aiPlayer.addDealerCard(_dealerCard);
+                        _dealerCard = null;
+                    }
+                    String move = aiPlayer.move();
+                    if (aiPlayer.handSum() > 21) {
+                        _playerStands.put(aiPlayer, _bust);
+                    } else if (move != null) {
+                        _playerStands.put(aiPlayer, move);
+                    }
                 }
-                aiPlayer.move();
-            } else if (ply instanceof Dealer){
+            } else if (ply instanceof Dealer && !_suspense){
+                _drawingCard = _gameDeck.get(0);
+                _gameDeck.remove(0);
+                System.out.println(ply.toString() + _drawingCard);
+                _currentTableCards.add(_drawingCard);
+
                 Dealer dealer = (Dealer) ply;
+                dealer.addCard(_drawingCard);
                 _dealerCard = _drawingCard;
                 dealer.move();
+                _playerStands.put(dealer, "suspense");
+                _suspense = !_suspense;
             }
             if (!(_gameTree.getFirst() instanceof AI || _gameTree.getFirst() instanceof Dealer)) {
                 _turn = !_turn;
             }
         }  else {
-            System.out.println("Player turn: ");
-            Player ply = _gameTree.pop();
-            _gameTree.add(ply);
-            _turn = !_turn;
-        }
-        return _drawingCard;
+            if (!(_playerStands.get(_gameTree.getFirst()).equals(_stand)
+                    || _playerStands.get(_gameTree.getFirst()).equals(_surrender)
+                    || _playerStands.get(_gameTree.getFirst()).equals(_bust))) {
+                round++;
+                Player ply = _gameTree.pop();
+                _gameTree.add(ply);
+                _drawingCard = _gameDeck.get(0);
+                _gameDeck.remove(0);
+                System.out.println(ply.toString() + _drawingCard);
+                _currentTableCards.add(_drawingCard);
+                ply.addCard(_drawingCard);
+                if (round > _players.size() && ply.handSum() < 21) {
+                    Scanner myObj = new Scanner(System.in);
+                    System.out.println("Player turn: ");
+                    String command = myObj.nextLine();
+                    try {
+                        scannerInterpreter(ply, command);
+                    } catch (IllegalArgumentException e) {
+                        e.fillInStackTrace();
+                    }
+                }
+                if (ply.handSum() > 21) {
+                    _playerStands.put(ply, _bust);
+                }
 
+                _turn = !_turn;
+            }
+            return _drawingCard;
+            }
+        return null;
+    }
+
+    private void dealRest() {
+        int count = 0;
+        for (String mood: _playerStands.values()) {
+            if (mood.equals(_surrender) || mood.equals(_bust) || mood.equals(_stand)) {
+                count++;
+            }
+        }
+        if (count == _playerStands.size() - 1) {
+            _suspense = !_suspense;
+            while (_dealer.handSum() < 17) {
+                _drawingCard = _gameDeck.get(0);
+                _gameDeck.remove(0);
+                System.out.println(_dealer.toString() + _drawingCard);
+                _currentTableCards.add(_drawingCard);
+
+                _dealer.addCard(_drawingCard);
+                _dealer.hit();
+            }
+        }
+
+        System.out.println(_currentTableCards);
+    }
+
+    private void scannerInterpreter(Player player, String cmd) throws IllegalArgumentException{
+        _playerStands.put(player, cmd);
+        switch (cmd) {
+            case _hit:
+                player.hit();
+                break;
+            case _stand:
+                player.stand();
+                break;
+            case _split:
+                player.split();
+                break;
+            case _double:
+                player.doubleHand();
+                break;
+            case _notsplit:
+                player.notSplit();
+                break;
+            case _surrender:
+                player.surrender();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     /** Recounts the card count at the table. **/
@@ -133,6 +246,9 @@ public class Game {
     private ArrayList<String> _addOneCards = new ArrayList<>();
     /** A list of cards that subtract 1 from count. **/
     private ArrayList<String> _subtractOneCards = new ArrayList<>();
+
+    private HashMap<Player, String> _playerStands = new HashMap<>();
+
     /** The game dealer. **/
     private Dealer _dealer;
     /** The Turn of the player. **/
@@ -147,4 +263,24 @@ public class Game {
     private Deck _deck;
     /** Current count of the cards. Initialized at 0. **/
     private int count = 0;
+
+    private int round = 0;
+
+    private final String _hit = "hit";
+
+    private final String _stand = "stand";
+
+    private final String _split = "split";
+
+    private final String _double = "double";
+
+    private final String _notsplit = "don't split";
+
+    private final String _surrender = "surrender";
+
+    private final String _bust = "bust";
+
+    private Boolean _suspense = false;
+
+
 }

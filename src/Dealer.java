@@ -12,13 +12,7 @@ public class Dealer extends Player{
      *  to stand/surrender the hand. **/
     public void move() {
         _numberOfCards++;
-        if (_numberOfCards > 1) {
-            if (handSum() < 17) {
-                hit();
-            } else {
-                stand();
-            }
-        }
+        hit();
     }
 
     /** Adds a ard to the Dealers hand.
@@ -35,7 +29,7 @@ public class Dealer extends Player{
 
     /** Calculates the sum of current hand.
      * @return the sum of the hand. **/
-    private int handSum() {
+    public int handSum() {
         int sum = 0;
         for (Card card : _dealer) {
             if (card.getFace().equals("A")) {
@@ -54,8 +48,14 @@ public class Dealer extends Player{
         return sum;
     }
 
+    @Override
+    public String toString() {
+        return "Dealer ->";
+    }
+
     /** Number of cards a dealer has, initialized at 0.**/
     private int _numberOfCards = 0;
     /** A list of dealers Cards. **/
     private ArrayList<Card> _dealer;
+
 }

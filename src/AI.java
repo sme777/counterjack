@@ -10,21 +10,22 @@ public class AI extends Player{
     }
 
     /** The move the AI will make based on the heuristics of perfect startegy. **/
-    public void move() {
+    public String move() {
         if (_dealer.size() == 0) {
-            System.out.println("Wait till your turn!");
+            return null;
         } else if (_ai.size() == 2 && _ai.get(0) == _ai.get(1)) {
-            splitHelper();
+            return splitHelper();
         } else if (_ai.size() == 2 && (_ai.contains(new Card("H", "A")) || _ai.contains(new Card("C", "A"))
                 || _ai.contains(new Card("D", "A")) || _ai.contains(new Card("S", "A")))) {
             if (!surrenderHelper()) {
-                softHelper();
+                return softHelper();
             }
         } else {
             if (!surrenderHelper()) {
-                hardHelper();
+                return hardHelper();
             }
         }
+        return null;
     }
 
     /** Adds a new card to the hand of the Dealer.
@@ -55,211 +56,218 @@ public class AI extends Player{
 
     /** Configures whether the hand needs to be split.
      *  Calls necessary functions based on perfect strategy. **/
-    private void splitHelper() {
+    private String splitHelper() {
         if (_ai.get(0).getFace().equals("A")) {
-            split();
+           return split();
         } else if (_ai.get(0).getFace().equals("K") || _ai.get(0).getFace().equals("Q")
                 || _ai.get(0).getFace().equals("J") || _ai.get(0).getFace().equals("10")) {
-            notSplit();
+            return notSplit();
         } else if (_ai.get(0).getFace().equals("9")) {
             if (dealerComparator("7") || dealerComparator("10")
                     || dealerComparator("A") || dealerComparator("J")
                     || dealerComparator("Q") || dealerComparator("K")) {
-                notSplit();
+                return notSplit();
             } else {
-                split();
+                return split();
             }
 
         } else if (_ai.get(0).getFace().equals("8")) {
-            split();
+            return split();
         } else if (_ai.get(0).getFace().equals("7")) {
 
             if (dealerComparator("8") || dealerComparator("9")
                     || dealerComparator("10") || dealerComparator("J")
                     || dealerComparator("Q") || dealerComparator("K")
                     || dealerComparator("A")) {
-                notSplit();
+                return notSplit();
             } else {
-                split();
+                return split();
             }
         } else if (_ai.get(0).getFace().equals("6")) {
             if (_doubleAfterSplit && dealerComparator("2")) {
-                split();
+                return split();
             }
             if (dealerComparator("7") || dealerComparator("8")
                     || dealerComparator("9") || dealerComparator("10")
                     || dealerComparator("J") || dealerComparator("Q")
                     || dealerComparator("K") || dealerComparator("A")) {
-                notSplit();
+                return notSplit();
             } else {
-                split();
+                return split();
             }
         } else if (_ai.get(0).getFace().equals("5")) {
-            notSplit();
+            return notSplit();
         } else if (_ai.get(0).getFace().equals("4")) {
             if (_doubleAfterSplit) {
                 if (dealerComparator("5") || dealerComparator("6")) {
-                    split();
+                    return split();
                 } else {
-                    notSplit();
+                    return notSplit();
                 }
             } else {
-                notSplit();
+                return notSplit();
             }
         } else if (_ai.get(0).getFace().equals("3")) {
             if (_doubleAfterSplit && (dealerComparator("2")
                     || dealerComparator("3"))) {
-                split();
+                return split();
             }
             if (dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6") || dealerComparator("7")) {
-                split();
+                return split();
             } else {
-                notSplit();
+                return notSplit();
             }
         } else if (_ai.get(0).getFace().equals("2")) {
             if (_doubleAfterSplit && (dealerComparator("2")
                     || dealerComparator("3"))) {
-                split();
+                return split();
             }
             if (dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6") || dealerComparator("7")) {
-                split();
+                return split();
             } else {
-                notSplit();
+                return notSplit();
             }
         } else {
+
             System.out.println("Wrong config.");
+            return null;
         }
     }
 
     /** Configures the correct move based on the sum of hand
      * based on the fact that the hand is soft. Calls the necessary
      * function based on perfect strategy. **/
-    private void softHelper() {
+    private String softHelper() {
         if (_ai.size() == 2) {
             if (aiComparator("9", 0) || aiComparator("9", 1)) {
-                stand();
+                return stand();
             } else if (aiComparator("8", 0) || aiComparator("8", 1)) {
                 if (dealerComparator("6")) {
-                    doubleHand();
+                    return doubleHand();
                 } else {
-                    stand();
+                    return stand();
                 }
             } else if (aiComparator("7", 0) || aiComparator("7", 1)) {
                 if (dealerComparator("9") || dealerComparator("10") || dealerComparator("J")
                     || dealerComparator("Q") || dealerComparator("K") || dealerComparator("A")) {
-                    hit();
+                    return hit();
                 } else if (dealerComparator("7") || dealerComparator("8")) {
-                    stand();
+                    return stand();
                 } else {
-                    doubleHand();
+                    return doubleHand();
                 }
             } else if (aiComparator("6",0) || aiComparator("6", 1)) {
                 if (dealerComparator("3") || dealerComparator("4")
                         || dealerComparator("5") || dealerComparator("6")) {
-                    doubleHand();
+                    return doubleHand();
                 } else {
-                    hit();
+                    return hit();
                 }
             } else if (aiComparator("5", 0) || aiComparator("5", 1)) {
                 if (dealerComparator("4") || dealerComparator("5") || dealerComparator("6")) {
-                    doubleHand();
+                    return doubleHand();
                 } else {
-                    hit();
+                    return hit();
                 }
             } else if (aiComparator("4", 0) || aiComparator("4", 1)) {
                 if (dealerComparator("4") || dealerComparator("5") || dealerComparator("6")) {
-                    doubleHand();
+                    return doubleHand();
                 } else {
-                    hit();
+                    return hit();
                 }
             } else if (aiComparator("3", 0) || aiComparator("3", 1)) {
                 if (dealerComparator("5") || dealerComparator("6")) {
-                    doubleHand();
+                    return doubleHand();
                 } else {
-                    hit();
+                    return hit();
                 }
             } else if (aiComparator("2", 0) || aiComparator("2", 1)) {
                 if (dealerComparator("5") || dealerComparator("6")) {
-                    doubleHand();
+                    return doubleHand();
                 } else {
-                    hit();
+                    return hit();
                 }
             } else {
+
                 System.out.println("Another wrong conflict");
+                return null;
             }
+        } else {
+            System.out.println("Not yet configured setting");
+            return null;
         }
     }
 
     /** Configures the correct move based on the sum of hand
      * based on the fact that the hand is hard. Calls the necessary
      * function based on perfect strategy. **/
-    private void hardHelper() {
+    private String hardHelper() {
         int handCount = handSum(_ai);
         if (handCount == 17) {
-            stand();
+            return stand();
         } else if (handCount == 16) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
-                stand();
+                return stand();
             } else {
-                hit();
+                return hit();
             }
         } else if (handCount == 15) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
-                stand();
+                return stand();
             } else {
-                hit();
+                return hit();
             }
         } else if (handCount == 14) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
-                stand();
+                return stand();
             } else {
-                hit();
+                return hit();
             }
         } else if (handCount == 13) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
-                stand();
+                return stand();
             } else {
-                hit();
+                return hit();
             }
         } else if (handCount == 12) {
             if (dealerComparator("4") || dealerComparator("5") || dealerComparator("6")) {
-                stand();
+                return stand();
             } else {
-                hit();
+                return hit();
             }
         } else if (handCount == 11) {
-            doubleHand();
+            return doubleHand();
         } else if (handCount == 10) {
             if (dealerComparator("10") || dealerComparator("J")
                     || dealerComparator("Q") || dealerComparator("K")
                     || dealerComparator("A")) {
-                hit();
+                return hit();
             } else {
-                doubleHand();
+                return doubleHand();
             }
         } else if (handCount == 9) {
             if (dealerComparator("3") || dealerComparator("4") ||
                     dealerComparator("5") || dealerComparator("6")) {
-                doubleHand();
+                return doubleHand();
             } else {
-                hit();
+                return hit();
             }
         } else if (handCount == 8) {
-            hit();
+            return hit();
         } else if (handCount > 17) {
-            stand();
+            return stand();
         } else {
-            hit();
+            return hit();
         }
     }
 
@@ -315,6 +323,11 @@ public class AI extends Player{
      * @param k the string value of the card **/
     private Boolean aiComparator(String k, int index) {
         return _ai.get(index).getFace().equals(k);
+    }
+
+    @Override
+    public String toString() {
+        return "AI ->";
     }
 
     /** A given game parameter, by default is true. **/

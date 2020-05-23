@@ -65,6 +65,30 @@ public class Player {
         return "bust";
     }
 
+    public int handSum() {
+        int sum = 0;
+        for (Card card : playerHand) {
+            if (card.getFace().equals("A")) {
+                if (sum < 11) {
+                    sum += 11;
+                } else {
+                    sum += 1;
+                }
+            } else if (card.getFace().equals("J") || card.getFace().equals("Q")
+                    || card.getFace().equals("K")) {
+                sum += 10;
+            } else {
+                sum += Integer.parseInt(card.getFace());
+            }
+        }
+        return sum;
+    }
+
+    @Override
+    public String toString() {
+        return "User Player ->";
+    }
+
     /** List of cards of Player's hand. **/
     private ArrayList<Card> playerHand;
 }
