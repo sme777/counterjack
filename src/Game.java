@@ -34,38 +34,62 @@ public class Game {
         _deck = deck;
         _gameDeck = deck.getRandomDeck();
         _turn = true;
-        while (ais > 0) {
-            AI sampleAI = new AI(true);
-            _ais.add(sampleAI);
-            _playerStands.put(sampleAI, "hit");
-            ais--;
-        }
         while (players > 0) {
             Player samplePlayer = new Player();
             _players.add(samplePlayer);
             _playerStands.put(samplePlayer, "hit");
+            _gameTree.add(samplePlayer);
             players--;
 
         }
+        while (ais > 0) {
+            AI sampleAI = new AI(true);
+            _ais.add(sampleAI);
+            _playerStands.put(sampleAI, "hit");
+            _gameTree.add(sampleAI);
+            ais--;
+        }
+
         _dealer = new Dealer();
         _playerStands.put(_dealer, "hit");
+        _gameTree.add(_dealer);
     }
 
     public void startGame() {
-        for (int i = 0; i < _players.size(); i++) {
-            while (!(_playerStands.get(_players.get(i)).equals(_stand)
-                    || _playerStands.get(_players.get(i)).equals(_bust)
-                    || _playerStands.get(_players.get(i)).equals(_surrender))) {
-                dealOne();
-            }
+//        for (int i = 0; i < _players.size(); i++) {
+//
+//
+//
+//            while (!(_playerStands.get(_players.get(i)).equals(_stand)
+//                    || _playerStands.get(_players.get(i)).equals(_bust)
+//                    || _playerStands.get(_players.get(i)).equals(_surrender))) {
+//                dealOne();
+//            }
+//
+//            while (!(_playerStands.get(_ais.get(i)).equals(_stand)
+//                    || _playerStands.get(_ais.get(i)).equals(_bust)
+//                    || _playerStands.get(_ais.get(i)).equals(_surrender))) {
+//                dealOne();
+//            }
+//        }
 
-            while (!(_playerStands.get(_ais.get(i)).equals(_stand)
-                    || _playerStands.get(_ais.get(i)).equals(_bust)
-                    || _playerStands.get(_ais.get(i)).equals(_surrender))) {
+        LinkedList<Player> playerSequence = (LinkedList<Player>) _gameTree.clone();
+        while (playerSequence.size() != 1) {
+            Player player = playerSequence.pop();
+            playerSequence.add(player);
+            if (_playerStands.get(player).equals(_bust)
+                    || _playerStands.get(player).equals(_stand)
+                    || _playerStands.get(player).equals(_surrender)) {
+                playerSequence.remove(player);
+            } else {
                 dealOne();
             }
         }
         dealRest();
+        recount();
+
+
+
     }
 
     /** Deals one card to the current player. Saves the drawn card to the
@@ -83,14 +107,10 @@ public class Game {
             _gameTree.add(ply);
             if (ply instanceof AI) {
                 AI aiPlayer = (AI) ply;
-                if (!(_playerStands.get(aiPlayer).equals(_stand)
-                        || _playerStands.get(aiPlayer).equals(_surrender)
-                        || _playerStands.get(aiPlayer).equals(_bust))) {
                     _drawingCard = _gameDeck.get(0);
                     _gameDeck.remove(0);
                     System.out.println(ply.toString() + _drawingCard);
                     _currentTableCards.add(_drawingCard);
-
 
                     aiPlayer.addCard(_drawingCard);
                     if (_dealerCard != null) {
@@ -103,7 +123,7 @@ public class Game {
                     } else if (move != null) {
                         _playerStands.put(aiPlayer, move);
                     }
-                }
+
             } else if (ply instanceof Dealer && !_suspense){
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
@@ -121,9 +141,7 @@ public class Game {
                 _turn = !_turn;
             }
         }  else {
-            if (!(_playerStands.get(_gameTree.getFirst()).equals(_stand)
-                    || _playerStands.get(_gameTree.getFirst()).equals(_surrender)
-                    || _playerStands.get(_gameTree.getFirst()).equals(_bust))) {
+
                 round++;
                 Player ply = _gameTree.pop();
                 _gameTree.add(ply);
@@ -147,7 +165,7 @@ public class Game {
                 }
 
                 _turn = !_turn;
-            }
+
             return _drawingCard;
             }
         return null;
