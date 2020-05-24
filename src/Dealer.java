@@ -3,7 +3,8 @@ import java.util.ArrayList;
 public class Dealer extends Player{
 
     /** Constructs a new Dealer. **/
-    public Dealer() {
+    public Dealer(String name) {
+        super(name);
         _dealer = new ArrayList<>();
     }
 
@@ -50,7 +51,7 @@ public class Dealer extends Player{
 
     @Override
     public String toString() {
-        return "Dealer ->";
+        return "Dealer gets: ";
     }
 
     /** Number of cards a dealer has, initialized at 0.**/

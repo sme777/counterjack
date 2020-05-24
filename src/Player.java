@@ -3,8 +3,9 @@ import java.util.ArrayList;
 public class Player {
 
     /** Constructs a new Player. **/
-    public Player() {
+    public Player(String name) {
         playerHand = new ArrayList<>();
+        _name = name;
     }
 
     /** Add card to the hand. Occurs when
@@ -27,41 +28,41 @@ public class Player {
 
     /** Player hits the hand. **/
     public String hit() {
-        System.out.println("Hit");
+        System.out.println(_name + " Hit");
         return "hit";
     }
     /** Player splits the hand. **/
     public String split() {
-        System.out.println("Split");
+        System.out.println(_name + " Split");
         return "split";
     }
 
     /** Player doubles the hand. **/
     public String doubleHand() {
-        System.out.println("Double");
+        System.out.println(_name + " Double");
         return "double";
     }
 
     /** Player stands the hand. **/
     public String stand() {
-        System.out.println("Stand");
+        System.out.println(_name + " Stand");
         return "stand";
     }
 
     /** Player doesn't split the hand. **/
     public String notSplit() {
-        System.out.println("Don't Split");
+        System.out.println(_name + " Don't Split");
         return "notsplit";
     }
     /** Player surrenders. **/
     public String surrender() {
-        System.out.println("Surrender");
+        System.out.println(_name + " Surrender");
         return "surrender";
     }
 
     /** Player goes bust. **/
     public String bust() {
-        System.out.println("Bust!");
+        System.out.println(_name + " Bust!");
         return "bust";
     }
 
@@ -86,9 +87,11 @@ public class Player {
 
     @Override
     public String toString() {
-        return "User Player ->";
+        return "User Player gets: ";
     }
 
     /** List of cards of Player's hand. **/
     private ArrayList<Card> playerHand;
+
+    private String _name;
 }

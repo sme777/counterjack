@@ -5,7 +5,8 @@ public class AI extends Player{
     /** Constructor of AI.
      * @param doubleAfterSplit configure
      * if double after split is allowed. **/
-    public AI(Boolean doubleAfterSplit) {
+    public AI(String name, Boolean doubleAfterSplit) {
+        super(name);
         _doubleAfterSplit = doubleAfterSplit;
     }
 
@@ -329,7 +330,7 @@ public class AI extends Player{
 
     @Override
     public String toString() {
-        return "AI ->";
+        return "AI gets: ";
     }
 
     /** A given game parameter, by default is true. **/

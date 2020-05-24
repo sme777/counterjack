@@ -9,11 +9,11 @@ public class Game {
         _deck = deck;
         _gameDeck = deck.getRandomDeck();
         _turn = true;
-        AI sampleAI = new AI(true);
-        Player samplePlayer = new Player();
+        AI sampleAI = new AI("AI",true);
+        Player samplePlayer = new Player("User Player");
         _ais.add(sampleAI);
         _players.add(samplePlayer);
-        _dealer = new Dealer();
+        _dealer = new Dealer("Dealer");
 
         _gameTree.add(samplePlayer);
         _gameTree.add(sampleAI);
@@ -35,22 +35,24 @@ public class Game {
         _gameDeck = deck.getRandomDeck();
         _turn = true;
         while (players > 0) {
-            Player samplePlayer = new Player();
+            Player samplePlayer = new Player("User Player" + players);
             _players.add(samplePlayer);
             _playerStands.put(samplePlayer, "hit");
             _gameTree.add(samplePlayer);
+            _playerCards.put(samplePlayer, new ArrayList<Card>());
             players--;
 
         }
         while (ais > 0) {
-            AI sampleAI = new AI(true);
+            AI sampleAI = new AI("AI " + ais, true);
             _ais.add(sampleAI);
             _playerStands.put(sampleAI, "hit");
             _gameTree.add(sampleAI);
+            _playerCards.put(sampleAI, new ArrayList<Card>());
             ais--;
         }
 
-        _dealer = new Dealer();
+        _dealer = new Dealer("Dealer");
         _playerStands.put(_dealer, "hit");
         _gameTree.add(_dealer);
 
@@ -109,12 +111,22 @@ public class Game {
         }
 
         if (!_turn) {
-            round++;
+
             Player ply = _gameTree.pop();
             _gameTree.add(ply);
             if (ply instanceof AI) {
 
                 AI aiPlayer = (AI) ply;
+
+                if (_playerCards.get(aiPlayer).size() > 1) {
+                    String move = aiPlayer.move();
+                    if (aiPlayer.handSum() > 21) {
+                        _playerStands.put(aiPlayer, _bust);
+                    } else if (move != null) {
+                        _playerStands.put(aiPlayer, move);
+                    }
+                }
+
                 if (!(_playerStands.get(aiPlayer).equals(_bust)
                         || _playerStands.get(aiPlayer).equals(_surrender)
                         || _playerStands.get(aiPlayer).equals(_stand))) {
@@ -122,18 +134,13 @@ public class Game {
                     _gameDeck.remove(0);
                     System.out.println(ply.toString() + _drawingCard);
                     _currentTableCards.add(_drawingCard);
-
+                    _playerCards.get(aiPlayer).add(_drawingCard);
                     aiPlayer.addCard(_drawingCard);
                     if (_dealerCard != null) {
                         aiPlayer.addDealerCard(_dealerCard);
 
                     }
-                    String move = aiPlayer.move();
-                    if (aiPlayer.handSum() > 21) {
-                        _playerStands.put(aiPlayer, _bust);
-                    } else if (move != null) {
-                        _playerStands.put(aiPlayer, move);
-                    }
+
                 }
 
             } else if (ply instanceof Dealer && !_suspense){
@@ -145,18 +152,34 @@ public class Game {
                 Dealer dealer = (Dealer) ply;
                 dealer.addCard(_drawingCard);
                 _dealerCard = _drawingCard;
-                dealer.move();
                 _playerStands.put(dealer, "suspense");
                 _suspense = !_suspense;
             }
             if (!(_gameTree.getFirst() instanceof AI) && !(_gameTree.getFirst() instanceof Dealer) ) {
                 _turn = !_turn;
+                if (_playerCards.get(_gameTree.getFirst()).size() > 1 && ply.handSum() < 21) {
+
+                    if (!(_playerStands.get(_gameTree.getFirst()).equals(_stand) || _playerStands.get(_gameTree.getFirst()).equals(_bust)
+                            || _playerStands.get(_gameTree.getFirst()).equals(_surrender))) {
+                        Scanner myObj = new Scanner(System.in);
+                        System.out.println("Player turn: ");
+                        _playerChoice = myObj.nextLine();
+                    }
+
+                }
             }
         }  else {
 
-            round++;
             Player ply = _gameTree.pop();
             _gameTree.add(ply);
+            _turn = !_turn;
+            if (_playerChoice != null) {
+                try {
+                    scannerInterpreter(ply, _playerChoice);
+                } catch (IllegalArgumentException e) {
+                    e.fillInStackTrace();
+                }
+            }
             if (!(_playerStands.get(ply).equals(_bust)
                     || _playerStands.get(ply).equals(_surrender)
                     || _playerStands.get(ply).equals(_stand))) {
@@ -164,23 +187,15 @@ public class Game {
                 _gameDeck.remove(0);
                 System.out.println(ply.toString() + _drawingCard);
                 _currentTableCards.add(_drawingCard);
+                _playerCards.get(ply).add(_drawingCard);
                 ply.addCard(_drawingCard);
                 if (ply.handSum() > 21) {
                     _playerStands.put(ply, _bust);
                 }
-                if (round > _players.size() && ply.handSum() < 21) {
-                    Scanner myObj = new Scanner(System.in);
-                    System.out.println("Player turn: ");
-                    String command = myObj.nextLine();
-                    try {
-                        scannerInterpreter(ply, command);
-                    } catch (IllegalArgumentException e) {
-                        e.fillInStackTrace();
-                    }
-                }
 
 
-                _turn = !_turn;
+
+
 
                 return _drawingCard;
             }
@@ -322,6 +337,8 @@ public class Game {
     private final String _bust = "bust";
 
     private Boolean _suspense = false;
+
+    private String _playerChoice;
 
 
 }
