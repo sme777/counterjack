@@ -53,6 +53,9 @@ public class Game {
         _dealer = new Dealer();
         _playerStands.put(_dealer, "hit");
         _gameTree.add(_dealer);
+
+        adderCards();
+        subtractCards();
     }
 
     public void startGame() {
@@ -81,6 +84,10 @@ public class Game {
                     || _playerStands.get(player).equals(_stand)
                     || _playerStands.get(player).equals(_surrender)) {
                 playerSequence.remove(player);
+                _gameTree.remove(player);
+                if (_turn) {
+                    _turn = false;
+                }
             } else {
                 dealOne();
             }
@@ -106,7 +113,11 @@ public class Game {
             Player ply = _gameTree.pop();
             _gameTree.add(ply);
             if (ply instanceof AI) {
+
                 AI aiPlayer = (AI) ply;
+                if (!(_playerStands.get(aiPlayer).equals(_bust)
+                        || _playerStands.get(aiPlayer).equals(_surrender)
+                        || _playerStands.get(aiPlayer).equals(_stand))) {
                     _drawingCard = _gameDeck.get(0);
                     _gameDeck.remove(0);
                     System.out.println(ply.toString() + _drawingCard);
@@ -115,7 +126,7 @@ public class Game {
                     aiPlayer.addCard(_drawingCard);
                     if (_dealerCard != null) {
                         aiPlayer.addDealerCard(_dealerCard);
-                        _dealerCard = null;
+
                     }
                     String move = aiPlayer.move();
                     if (aiPlayer.handSum() > 21) {
@@ -123,6 +134,7 @@ public class Game {
                     } else if (move != null) {
                         _playerStands.put(aiPlayer, move);
                     }
+                }
 
             } else if (ply instanceof Dealer && !_suspense){
                 _drawingCard = _gameDeck.get(0);
@@ -137,19 +149,25 @@ public class Game {
                 _playerStands.put(dealer, "suspense");
                 _suspense = !_suspense;
             }
-            if (!(_gameTree.getFirst() instanceof AI || _gameTree.getFirst() instanceof Dealer)) {
+            if (!(_gameTree.getFirst() instanceof AI) && !(_gameTree.getFirst() instanceof Dealer) ) {
                 _turn = !_turn;
             }
         }  else {
 
-                round++;
-                Player ply = _gameTree.pop();
-                _gameTree.add(ply);
+            round++;
+            Player ply = _gameTree.pop();
+            _gameTree.add(ply);
+            if (!(_playerStands.get(ply).equals(_bust)
+                    || _playerStands.get(ply).equals(_surrender)
+                    || _playerStands.get(ply).equals(_stand))) {
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
                 System.out.println(ply.toString() + _drawingCard);
                 _currentTableCards.add(_drawingCard);
                 ply.addCard(_drawingCard);
+                if (ply.handSum() > 21) {
+                    _playerStands.put(ply, _bust);
+                }
                 if (round > _players.size() && ply.handSum() < 21) {
                     Scanner myObj = new Scanner(System.in);
                     System.out.println("Player turn: ");
@@ -160,14 +178,13 @@ public class Game {
                         e.fillInStackTrace();
                     }
                 }
-                if (ply.handSum() > 21) {
-                    _playerStands.put(ply, _bust);
-                }
+
 
                 _turn = !_turn;
 
-            return _drawingCard;
+                return _drawingCard;
             }
+        }
         return null;
     }
 
@@ -234,6 +251,10 @@ public class Game {
         System.out.println(count);
     }
 
+    public void evaluateWinners() {
+
+    }
+
     /** Clears the current table cards. **/
     public void clearTableCards() {
         _currentTableCards.removeAll(_currentTableCards);
@@ -266,6 +287,8 @@ public class Game {
     private ArrayList<String> _subtractOneCards = new ArrayList<>();
 
     private HashMap<Player, String> _playerStands = new HashMap<>();
+
+    private HashMap<Player, ArrayList<Card>> _playerCards = new HashMap<>();
 
     /** The game dealer. **/
     private Dealer _dealer;

@@ -32,7 +32,9 @@ public class AI extends Player{
      * Occurs when a card is dealt to the Dealer.
      * @param c the given card needed to be added.**/
     public void addDealerCard(Card c) {
-        _dealer.add(c);
+        if (_dealer.size() == 0) {
+            _dealer.add(c);
+        }
     }
 
     /** Adds a new card to the hand of the AI.
