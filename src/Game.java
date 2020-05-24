@@ -22,6 +22,14 @@ public class Game {
         _playerStands.put(sampleAI, "hit");
         _playerStands.put(samplePlayer, "hit");
         _playerStands.put(_dealer, "hit");
+
+        _playerCards.put(samplePlayer, new ArrayList<Card>());
+        _playerCards.put(sampleAI, new ArrayList<Card>());
+        _playerCards.put(_dealer, new ArrayList<Card>());
+
+        _winnersAndLosers.put("winners", new ArrayList<Player>());
+        _winnersAndLosers.put("losers", new ArrayList<Player>());
+        _winnersAndLosers.put("break", new ArrayList<Player>());
         subtractCards();
         adderCards();
     }
@@ -55,28 +63,17 @@ public class Game {
         _dealer = new Dealer("Dealer");
         _playerStands.put(_dealer, "hit");
         _gameTree.add(_dealer);
+        _playerCards.put(_dealer, new ArrayList<Card>());
+
+        _winnersAndLosers.put("winners", new ArrayList<Player>());
+        _winnersAndLosers.put("losers", new ArrayList<Player>());
+        _winnersAndLosers.put("break", new ArrayList<Player>());
 
         adderCards();
         subtractCards();
     }
 
     public void startGame() {
-//        for (int i = 0; i < _players.size(); i++) {
-//
-//
-//
-//            while (!(_playerStands.get(_players.get(i)).equals(_stand)
-//                    || _playerStands.get(_players.get(i)).equals(_bust)
-//                    || _playerStands.get(_players.get(i)).equals(_surrender))) {
-//                dealOne();
-//            }
-//
-//            while (!(_playerStands.get(_ais.get(i)).equals(_stand)
-//                    || _playerStands.get(_ais.get(i)).equals(_bust)
-//                    || _playerStands.get(_ais.get(i)).equals(_surrender))) {
-//                dealOne();
-//            }
-//        }
 
         LinkedList<Player> playerSequence = (LinkedList<Player>) _gameTree.clone();
         while (playerSequence.size() != 1) {
@@ -96,6 +93,9 @@ public class Game {
         }
         dealRest();
         recount();
+        evaluateWinners();
+        System.out.println(_winnersAndLosers);
+        reset();
 
 
 
@@ -148,7 +148,7 @@ public class Game {
                 _gameDeck.remove(0);
                 System.out.println(ply.toString() + _drawingCard);
                 _currentTableCards.add(_drawingCard);
-
+                _playerCards.get(_dealer).add(_drawingCard);
                 Dealer dealer = (Dealer) ply;
                 dealer.addCard(_drawingCard);
                 _dealerCard = _drawingCard;
@@ -215,11 +215,12 @@ public class Game {
             while (_dealer.handSum() < 17) {
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
+                _dealer.hit();
                 System.out.println(_dealer.toString() + _drawingCard);
                 _currentTableCards.add(_drawingCard);
-
+                _playerCards.get(_dealer).add(_drawingCard);
                 _dealer.addCard(_drawingCard);
-                _dealer.hit();
+
             }
         }
 
@@ -253,7 +254,7 @@ public class Game {
     }
 
     /** Recounts the card count at the table. **/
-    public void recount() {
+    private void recount() {
         for (int i = 0; i < _currentTableCards.size(); i++) {
             if (_addOneCards.contains(_currentTableCards.get(i).getFace())) {
                 count++;
@@ -266,15 +267,58 @@ public class Game {
         System.out.println(count);
     }
 
-    public void evaluateWinners() {
-        
+    private int count(ArrayList<Card> array) {
+        int sum = 0;
+        for (Card card : array) {
+            if (card.getFace().equals("A")) {
+                sum += 11;
+            } else if (card.getFace().equals("J") || card.getFace().equals("Q")
+                    || card.getFace().equals("K")) {
+                sum += 10;
+            } else {
+                sum += Integer.parseInt(card.getFace());
+            }
+        }
+        return sum;
+
     }
 
-    /** Clears the current table cards. **/
-    public void clearTableCards() {
-        _currentTableCards.removeAll(_currentTableCards);
-        System.out.println(_currentTableCards.size());
+
+    private void evaluateWinners() {
+        for (Player player : _playerCards.keySet()) {
+            if (!(player instanceof Dealer)) {
+                int handValue = count(_playerCards.get(player));
+                int dealerValue = count(_playerCards.get(_dealer));
+                if (handValue > dealerValue) {
+                    if (handValue > 21) {
+                        _winnersAndLosers.get("losers").add(player);
+                    } else {
+                        _winnersAndLosers.get("winners").add(player);
+                    }
+                } else {
+                    if (dealerValue > 21) {
+                        _winnersAndLosers.get("winners").add(player);
+                    } else {
+                        _winnersAndLosers.get("losers").add(player);
+                    }
+                }
+            }
+        }
     }
+
+    private void reset() {
+        _currentTableCards.removeAll(_currentTableCards);
+        _winnersAndLosers = new HashMap<>();
+        _playerStands.replaceAll((p, v) -> _hit);
+        _playerCards.replaceAll((p, v) -> new ArrayList<Card>());
+        _dealer.removeAll();
+        _turn = true;
+        _drawingCard = null;
+        _dealerCard = null;
+        _playerChoice = null;
+
+    }
+
 
     /** Configures the additive cards. **/
     private void adderCards() {
@@ -301,6 +345,8 @@ public class Game {
     /** A list of cards that subtract 1 from count. **/
     private ArrayList<String> _subtractOneCards = new ArrayList<>();
 
+    private HashMap<String, ArrayList<Player>> _winnersAndLosers = new HashMap<>();
+
     private HashMap<Player, String> _playerStands = new HashMap<>();
 
     private HashMap<Player, ArrayList<Card>> _playerCards = new HashMap<>();
@@ -319,8 +365,6 @@ public class Game {
     private Deck _deck;
     /** Current count of the cards. Initialized at 0. **/
     private int count = 0;
-
-    private int round = 0;
 
     private final String _hit = "hit";
 

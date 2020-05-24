@@ -18,16 +18,20 @@ public class AI extends Player{
         } else if (_ai.size() == 2 && _ai.get(0) == _ai.get(1)) {
             return splitHelper();
         } else if (_ai.size() == 2 && isASoftHand()) {
-                if (!surrenderHelper()) {
-                    softHelper();
+                if (surrenderHelper()) {
+                    return "surrender";
+                } else {
+                    return softHelper();
                 }
         }
         else {
-            if (!surrenderHelper()) {
+            if (surrenderHelper()) {
+                return "surrender";
+            } else {
                 return hardHelper();
             }
         }
-        return null;
+
     }
 
     private Boolean isASoftHand() {
@@ -72,11 +76,14 @@ public class AI extends Player{
     private String splitHelper() {
         switch (_ai.get(0).getFace()) {
             case "A":
+
+            case "8":
                 return split();
             case "K":
             case "Q":
             case "J":
             case "10":
+            case "5":
                 return notSplit();
             case "9":
                 if (dealerComparator("7") || dealerComparator("10")
@@ -86,9 +93,6 @@ public class AI extends Player{
                 } else {
                     return split();
                 }
-
-            case "8":
-                return split();
             case "7":
 
                 if (dealerComparator("8") || dealerComparator("9")
@@ -111,8 +115,6 @@ public class AI extends Player{
                 } else {
                     return split();
                 }
-            case "5":
-                return notSplit();
             case "4":
                 if (_doubleAfterSplit) {
                     if (dealerComparator("5") || dealerComparator("6")) {
@@ -124,16 +126,6 @@ public class AI extends Player{
                     return notSplit();
                 }
             case "3":
-                if (_doubleAfterSplit && (dealerComparator("2")
-                        || dealerComparator("3"))) {
-                    return split();
-                }
-                if (dealerComparator("4") || dealerComparator("5")
-                        || dealerComparator("6") || dealerComparator("7")) {
-                    return split();
-                } else {
-                    return notSplit();
-                }
             case "2":
                 if (_doubleAfterSplit && (dealerComparator("2")
                         || dealerComparator("3"))) {
