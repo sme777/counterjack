@@ -7,6 +7,7 @@ public class AI extends Player{
      * if double after split is allowed. **/
     public AI(String name, Boolean doubleAfterSplit) {
         super(name);
+        _name = name;
         _doubleAfterSplit = doubleAfterSplit;
     }
 
@@ -16,17 +17,26 @@ public class AI extends Player{
             return null;
         } else if (_ai.size() == 2 && _ai.get(0) == _ai.get(1)) {
             return splitHelper();
-        } else if (_ai.size() == 2 && (_ai.contains(new Card("H", "A")) || _ai.contains(new Card("C", "A"))
-                || _ai.contains(new Card("D", "A")) || _ai.contains(new Card("S", "A")))) {
-            if (!surrenderHelper()) {
-                return softHelper();
-            }
-        } else {
+        } else if (_ai.size() == 2 && isASoftHand()) {
+                if (!surrenderHelper()) {
+                    softHelper();
+                }
+        }
+        else {
             if (!surrenderHelper()) {
                 return hardHelper();
             }
         }
         return null;
+    }
+
+    private Boolean isASoftHand() {
+        for (Card c: _ai) {
+            if (c.getFace().equals("A")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Adds a new card to the hand of the Dealer.
@@ -60,82 +70,85 @@ public class AI extends Player{
     /** Configures whether the hand needs to be split.
      *  Calls necessary functions based on perfect strategy. **/
     private String splitHelper() {
-        if (_ai.get(0).getFace().equals("A")) {
-           return split();
-        } else if (_ai.get(0).getFace().equals("K") || _ai.get(0).getFace().equals("Q")
-                || _ai.get(0).getFace().equals("J") || _ai.get(0).getFace().equals("10")) {
-            return notSplit();
-        } else if (_ai.get(0).getFace().equals("9")) {
-            if (dealerComparator("7") || dealerComparator("10")
-                    || dealerComparator("A") || dealerComparator("J")
-                    || dealerComparator("Q") || dealerComparator("K")) {
-                return notSplit();
-            } else {
+        switch (_ai.get(0).getFace()) {
+            case "A":
                 return split();
-            }
+            case "K":
+            case "Q":
+            case "J":
+            case "10":
+                return notSplit();
+            case "9":
+                if (dealerComparator("7") || dealerComparator("10")
+                        || dealerComparator("A") || dealerComparator("J")
+                        || dealerComparator("Q") || dealerComparator("K")) {
+                    return notSplit();
+                } else {
+                    return split();
+                }
 
-        } else if (_ai.get(0).getFace().equals("8")) {
-            return split();
-        } else if (_ai.get(0).getFace().equals("7")) {
+            case "8":
+                return split();
+            case "7":
 
-            if (dealerComparator("8") || dealerComparator("9")
-                    || dealerComparator("10") || dealerComparator("J")
-                    || dealerComparator("Q") || dealerComparator("K")
-                    || dealerComparator("A")) {
+                if (dealerComparator("8") || dealerComparator("9")
+                        || dealerComparator("10") || dealerComparator("J")
+                        || dealerComparator("Q") || dealerComparator("K")
+                        || dealerComparator("A")) {
+                    return notSplit();
+                } else {
+                    return split();
+                }
+            case "6":
+                if (_doubleAfterSplit && dealerComparator("2")) {
+                    return split();
+                }
+                if (dealerComparator("7") || dealerComparator("8")
+                        || dealerComparator("9") || dealerComparator("10")
+                        || dealerComparator("J") || dealerComparator("Q")
+                        || dealerComparator("K") || dealerComparator("A")) {
+                    return notSplit();
+                } else {
+                    return split();
+                }
+            case "5":
                 return notSplit();
-            } else {
-                return split();
-            }
-        } else if (_ai.get(0).getFace().equals("6")) {
-            if (_doubleAfterSplit && dealerComparator("2")) {
-                return split();
-            }
-            if (dealerComparator("7") || dealerComparator("8")
-                    || dealerComparator("9") || dealerComparator("10")
-                    || dealerComparator("J") || dealerComparator("Q")
-                    || dealerComparator("K") || dealerComparator("A")) {
-                return notSplit();
-            } else {
-                return split();
-            }
-        } else if (_ai.get(0).getFace().equals("5")) {
-            return notSplit();
-        } else if (_ai.get(0).getFace().equals("4")) {
-            if (_doubleAfterSplit) {
-                if (dealerComparator("5") || dealerComparator("6")) {
+            case "4":
+                if (_doubleAfterSplit) {
+                    if (dealerComparator("5") || dealerComparator("6")) {
+                        return split();
+                    } else {
+                        return notSplit();
+                    }
+                } else {
+                    return notSplit();
+                }
+            case "3":
+                if (_doubleAfterSplit && (dealerComparator("2")
+                        || dealerComparator("3"))) {
+                    return split();
+                }
+                if (dealerComparator("4") || dealerComparator("5")
+                        || dealerComparator("6") || dealerComparator("7")) {
                     return split();
                 } else {
                     return notSplit();
                 }
-            } else {
-                return notSplit();
-            }
-        } else if (_ai.get(0).getFace().equals("3")) {
-            if (_doubleAfterSplit && (dealerComparator("2")
-                    || dealerComparator("3"))) {
-                return split();
-            }
-            if (dealerComparator("4") || dealerComparator("5")
-                    || dealerComparator("6") || dealerComparator("7")) {
-                return split();
-            } else {
-                return notSplit();
-            }
-        } else if (_ai.get(0).getFace().equals("2")) {
-            if (_doubleAfterSplit && (dealerComparator("2")
-                    || dealerComparator("3"))) {
-                return split();
-            }
-            if (dealerComparator("4") || dealerComparator("5")
-                    || dealerComparator("6") || dealerComparator("7")) {
-                return split();
-            } else {
-                return notSplit();
-            }
-        } else {
+            case "2":
+                if (_doubleAfterSplit && (dealerComparator("2")
+                        || dealerComparator("3"))) {
+                    return split();
+                }
+                if (dealerComparator("4") || dealerComparator("5")
+                        || dealerComparator("6") || dealerComparator("7")) {
+                    return split();
+                } else {
+                    return notSplit();
+                }
+            default:
 
-            System.out.println("Wrong config.");
-            return null;
+                System.out.println("Wrong config.");
+                return null;
         }
     }
 
@@ -278,12 +291,12 @@ public class AI extends Player{
      * @return true if needs to surrender. **/
     private Boolean surrenderHelper() {
         int handCount = handSum(_ai);
-        if (handCount == 16 && (dealerComparator("9") || dealerComparator("10")
+        if (handCount == 16 && !isASoftHand() && (dealerComparator("9") || dealerComparator("10")
                 || dealerComparator("J") || dealerComparator("Q")
                 || dealerComparator("K") || dealerComparator("A"))) {
             surrender();
             return true;
-        } else if (handCount == 15 && (dealerComparator("10")
+        } else if (handCount == 15 && !isASoftHand() && (dealerComparator("10")
                 || dealerComparator("J") || dealerComparator("Q")
                 || dealerComparator("K"))) {
             surrender();
@@ -330,9 +343,10 @@ public class AI extends Player{
 
     @Override
     public String toString() {
-        return "AI gets: ";
+        return  _name +" gets: ";
     }
 
+    private String _name;
     /** A given game parameter, by default is true. **/
     private Boolean _doubleAfterSplit;
     /** A list of dealer cards. Logic is made from the first card only. **/
