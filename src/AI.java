@@ -1,3 +1,4 @@
+import java.awt.image.AreaAveragingScaleFilter;
 import java.util.ArrayList;
 
 public class AI extends Player{
@@ -21,14 +22,14 @@ public class AI extends Player{
                 if (surrenderHelper()) {
                     return "surrender";
                 } else {
-                    return softHelper();
+                    return softHelper(_ai);
                 }
         }
         else {
             if (surrenderHelper()) {
                 return "surrender";
             } else {
-                return hardHelper();
+                return hardHelper(handSum(_ai));
             }
         }
 
@@ -42,6 +43,7 @@ public class AI extends Player{
         }
         return false;
     }
+    
 
     /** Adds a new card to the hand of the Dealer.
      * Occurs when a card is dealt to the Dealer.
@@ -138,7 +140,6 @@ public class AI extends Player{
                     return notSplit();
                 }
             default:
-
                 System.out.println("Wrong config.");
                 return null;
         }
@@ -147,8 +148,8 @@ public class AI extends Player{
     /** Configures the correct move based on the sum of hand
      * based on the fact that the hand is soft. Calls the necessary
      * function based on perfect strategy. **/
-    private String softHelper() {
-        if (_ai.size() == 2) {
+    private String softHelper(ArrayList<Card> array) {
+        if (array.size() == 2) {
             if (aiComparator("9", 0) || aiComparator("9", 1)) {
                 return stand();
             } else if (aiComparator("8", 0) || aiComparator("8", 1)) {
@@ -198,21 +199,79 @@ public class AI extends Player{
                     return hit();
                 }
             } else {
-
-                System.out.println("Another wrong conflict");
-                return null;
+                return blackjack();
             }
         } else {
-            System.out.println("Not yet configured setting");
-            return null;
+            ArrayList <Card> aces = new ArrayList<>();
+            int score = 0;
+            for (Card c: _ai) {
+                if (!c.getFace().equals("A")) {
+                    if (c.getFace().equals("J")
+                            || c.getFace().equals("Q")
+                            || c.getFace().equals("K")) {
+                        score += 10;
+                    } else {
+                        score += Integer.parseInt(c.getFace());
+                    }
+                } else {
+                    aces.add(c);
+                }
+            }
+            if (aces.size() == 1) {
+                if (score + 11 > 21) {
+                    score += 1;
+                    return hardHelper(score);
+                } else {
+                    ArrayList<Card> arr = new ArrayList<>();
+                    arr.add(new Card("M", "A"));
+                    arr.add(new Card("M", String.valueOf(score)));
+                    score += 11;
+                    return softHelper(arr);
+                }
+            } else if (aces.size() == 2) {
+                if (score + 12 > 21) {
+                    score += 2;
+                    return hardHelper(score);
+                } else {
+                    ArrayList<Card> arr = new ArrayList<>();
+                    arr.add(new Card("M", "A"));
+                    arr.add(new Card("M", String.valueOf(score + 1)));
+                    score += 12;
+                    return softHelper(arr);
+                }
+            } else if (aces.size() == 3) {
+                if (score + 13 > 21) {
+                    score += 3;
+                    return hardHelper(score);
+                } else {
+                    ArrayList<Card> arr = new ArrayList<>();
+                    arr.add(new Card("M", "A"));
+                    arr.add(new Card("M", String.valueOf(score + 2)));
+                    score += 13;
+                    return softHelper(arr);
+
+                }
+            } else if (aces.size() == 4) {
+                if (score + 14 > 21) {
+                    score += 4;
+                    hardHelper(score);
+                } else {
+                    ArrayList<Card> arr = new ArrayList<>();
+                    arr.add(new Card("M", "A"));
+                    arr.add(new Card("M", String.valueOf(score + 3)));
+                    score += 14;
+                    return softHelper(arr);
+                }
+            }
         }
+        return null;
     }
 
     /** Configures the correct move based on the sum of hand
      * based on the fact that the hand is hard. Calls the necessary
      * function based on perfect strategy. **/
-    private String hardHelper() {
-        int handCount = handSum(_ai);
+    private String hardHelper(int value) {
+        int handCount = value;
         if (handCount == 17) {
             return stand();
         } else if (handCount == 16) {
@@ -273,6 +332,11 @@ public class AI extends Player{
         } else if (handCount == 8) {
             return hit();
         } else if (handCount > 17) {
+            if (handCount == 21) {
+                return blackjack();
+            } else if (handCount > 21) {
+                return bust();
+            }
             return stand();
         } else {
             return hit();
@@ -332,10 +396,14 @@ public class AI extends Player{
     private Boolean aiComparator(String k, int index) {
         return _ai.get(index).getFace().equals(k);
     }
+    @Override
+    public String deal() {
+        return _name +" gets: ";
+    }
 
     @Override
     public String toString() {
-        return  _name +" gets: ";
+        return  _name ;
     }
 
     private String _name;

@@ -5,6 +5,7 @@ public class Dealer extends Player{
     /** Constructs a new Dealer. **/
     public Dealer(String name) {
         super(name);
+        _name = name;
         _dealer = new ArrayList<>();
     }
 
@@ -48,12 +49,16 @@ public class Dealer extends Player{
         }
         return sum;
     }
-
+    @Override
+    public String deal() {
+        return _name + " gets: ";
+    }
     @Override
     public String toString() {
-        return "Dealer gets: ";
+        return _name;
     }
 
+    private String _name;
     /** Number of cards a dealer has, initialized at 0.**/
     private int _numberOfCards = 0;
     /** A list of dealers Cards. **/

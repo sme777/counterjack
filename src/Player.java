@@ -66,6 +66,11 @@ public class Player {
         return "bust";
     }
 
+    public String blackjack() {
+        System.out.println(_name + " got Blackjack!");
+        return "blackjack";
+    }
+
     public int handSum() {
         int sum = 0;
         for (Card card : playerHand) {
@@ -85,9 +90,12 @@ public class Player {
         return sum;
     }
 
+    public String deal() {
+        return _name + " gets: ";
+    }
     @Override
     public String toString() {
-        return "User Player gets: ";
+        return _name;
     }
 
     /** List of cards of Player's hand. **/
