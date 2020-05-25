@@ -386,7 +386,11 @@ public class Game {
     }
 
     private void shuffle() {
-
+        if (_gameDeck.size() == _penetration
+                || _gameDeck.size() == 0
+                || _gameDeck.size() < _penetration) {
+            _gameDeck = _deck.getRandomDeck();
+        }
     }
 
 

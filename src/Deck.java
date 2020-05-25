@@ -55,6 +55,7 @@ public class Deck {
         return penetrationPosition;
     }
 
+
     /** Returns a generated organized deck.
      * @return an arraylist of cards. **/
     ArrayList<Card> getOrganizedDeck() {
