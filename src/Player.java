@@ -66,11 +66,14 @@ public class Player {
         return "bust";
     }
 
+    /** Player gets a blackjack. **/
     public String blackjack() {
         System.out.println(_name + " got Blackjack!");
         return "blackjack";
     }
 
+    /** THe sum of the player's cards.
+     * @return the accumulated value of player's card**/
     public int handSum() {
         int sum = 0;
         for (Card card : playerHand) {
@@ -90,9 +93,12 @@ public class Player {
         return sum;
     }
 
+    /** The value returned when a player is in game and receives a card. **/
     public String deal() {
         return _name + " gets: ";
     }
+
+    /** Overridden value of toString, changed to the name of the Player. **/
     @Override
     public String toString() {
         return _name;
@@ -100,6 +106,6 @@ public class Player {
 
     /** List of cards of Player's hand. **/
     private ArrayList<Card> playerHand;
-
+    /** The name of the Player. **/
     private String _name;
 }

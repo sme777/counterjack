@@ -10,7 +10,7 @@ public class Game {
         _gameDeck = deck.getRandomDeck();
         _turn = true;
         _penetration = _deck.getPenetrationPosition();
-        AI sampleAI = new AI("AI",true);
+        AI sampleAI = new AI("AI", true);
         Player samplePlayer = new Player("User Player");
         _ais.add(sampleAI);
         _players.add(samplePlayer);
@@ -75,7 +75,7 @@ public class Game {
         subtractCards();
     }
 
-
+    /** The loop of the game, initiates a new game. **/
     public void startGame() {
         while (_gameDeck.size() > _penetration) {
             LinkedList<Player> playerSequence = (LinkedList<Player>) _gameTree.clone();
@@ -102,7 +102,8 @@ public class Game {
             System.out.println(_winnersAndLosers);
             reset();
         }
-
+        shuffle();
+        startGame();
 
 
     }
@@ -115,15 +116,14 @@ public class Game {
         if (_gameDeck == null) {
             System.out.println("An Error Occurred.");
         }
-
+        if (_gameDeck.size() == 0) {
+            shuffle();
+        }
         if (!_turn) {
-
             Player ply = _gameTree.pop();
             _gameTree.add(ply);
             if (ply instanceof AI) {
-
                 AI aiPlayer = (AI) ply;
-
                 if (_playerCards.get(aiPlayer).size() > 1) {
                     String move = aiPlayer.move();
                     if (aiPlayer.handSum() > 21) {
@@ -131,6 +131,9 @@ public class Game {
                     } else if (move != null) {
                         _playerStands.put(aiPlayer, move);
                     }
+                }
+                if (_playerStands.get(aiPlayer).equals(_split)) {
+                    split(aiPlayer);
                 }
 
                 if (!(_playerStands.get(aiPlayer).equals(_bust)
@@ -145,12 +148,9 @@ public class Game {
                     aiPlayer.addCard(_drawingCard);
                     if (_dealerCard != null) {
                         aiPlayer.addDealerCard(_dealerCard);
-
                     }
-
                 }
-
-            } else if (ply instanceof Dealer && !_suspense){
+            } else if (ply instanceof Dealer && !_suspense) {
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
                 System.out.println(ply.deal() + _drawingCard);
@@ -162,10 +162,10 @@ public class Game {
                 _playerStands.put(dealer, "suspense");
                 _suspense = !_suspense;
             }
-            if (!(_gameTree.getFirst() instanceof AI) && !(_gameTree.getFirst() instanceof Dealer) ) {
+            if (!(_gameTree.getFirst() instanceof AI)
+                    && !(_gameTree.getFirst() instanceof Dealer)) {
                 _turn = !_turn;
                 if (_playerCards.get(_gameTree.getFirst()).size() > 1 && ply.handSum() < 21) {
-
                     if (!(_playerStands.get(_gameTree.getFirst()).equals(_stand)
                             || _playerStands.get(_gameTree.getFirst()).equals(_bust)
                             || _playerStands.get(_gameTree.getFirst()).equals(_surrender)
@@ -174,11 +174,9 @@ public class Game {
                         System.out.println("Player turn: ");
                         _playerChoice = myObj.nextLine();
                     }
-
                 }
             }
         }  else {
-
             Player ply = _gameTree.pop();
             _gameTree.add(ply);
             _turn = !_turn;
@@ -202,26 +200,35 @@ public class Game {
                 if (ply.handSum() > 21) {
                     _playerStands.put(ply, _bust);
                 }
-
-
-
-
-
                 return _drawingCard;
             }
         }
         return null;
     }
 
+    // update the card list, stands etc.
+    private void split(Player player) {
+        System.out.println("This will split the pair and add a second hand for " + player.toString());
+        if (player instanceof AI) {
+            AI ai = (AI) player;
+            AI newAi = new AI(ai.toString() + ".2", true);
+            _gameTree.add(_gameTree.indexOf(ai) + 1, newAi);
+        } else {
+            Player newPlayer = new Player(player.toString() + ".2");
+            _gameTree.add(_gameTree.indexOf(player) + 1, newPlayer);
+        }
+    }
+
+    /** Deals the rest of the cards to the dealer when all players and AIs have settled. **/
     private void dealRest() {
-        int count = 0;
+        int currCount = 0;
         for (String mood: _playerStands.values()) {
             if (mood.equals(_surrender) || mood.equals(_bust) || mood.equals(_stand)
                     || mood.equals(_double) || mood.equals(_blackjack)) {
-                count++;
+                currCount++;
             }
         }
-        if (count == _playerStands.size() - 1) {
+        if (currCount == _playerStands.size() - 1) {
             _suspense = !_suspense;
             while (_dealer.handSum() < 17) {
                 _drawingCard = _gameDeck.get(0);
@@ -234,11 +241,13 @@ public class Game {
 
             }
         }
-
         System.out.println(_currentTableCards);
     }
 
-    private void scannerInterpreter(Player player, String cmd) throws IllegalArgumentException{
+    /** Interprets the result of user input.
+     * @param player given player that is inputting.
+     * @param cmd the supplied command of the player.**/
+    private void scannerInterpreter(Player player, String cmd) throws IllegalArgumentException {
         _playerStands.put(player, cmd);
         switch (cmd) {
             case _hit:
@@ -269,8 +278,11 @@ public class Game {
         for (int i = 0; i < _currentTableCards.size(); i++) {
             if (_addOneCards.contains(_currentTableCards.get(i).getFace())) {
                 count++;
+
+
             } else if (_subtractOneCards.contains(_currentTableCards.get(i).getFace())) {
                 count--;
+
             } else {
                 continue;
             }
@@ -278,6 +290,9 @@ public class Game {
         System.out.println(count);
     }
 
+    /** Counts the value of a hand.
+     * @param array supplied list of card,
+     * @return the value of accumulated card. **/
     private int count(ArrayList<Card> array) {
         int sum = 0;
         ArrayList<Card> arr = new ArrayList<>();
@@ -321,10 +336,9 @@ public class Game {
             }
         }
         return sum;
-
     }
 
-
+    /** Evaluates winners and losers after each hand. **/
     private void evaluateWinners() {
         for (Player player : _playerCards.keySet()) {
             if (!(player instanceof Dealer)) {
@@ -339,7 +353,7 @@ public class Game {
                 } else {
                     if (dealerValue > 21) {
                         _winnersAndLosers.get("winners").add(player);
-                    } else if (dealerValue == handValue){
+                    } else if (dealerValue == handValue) {
                         _winnersAndLosers.get("break").add(player);
                     } else {
                         _winnersAndLosers.get("losers").add(player);
@@ -349,6 +363,7 @@ public class Game {
         }
     }
 
+    /** Resets the data structures of the game after a hand is dealt. **/
     private void reset() {
         _currentTableCards.removeAll(_currentTableCards);
         _winnersAndLosers.put("winners", new ArrayList<Player>());
@@ -365,6 +380,7 @@ public class Game {
 
     }
 
+    /** Reconstructs the game tree after a hand is dealt. **/
     private void reconstructGameTree() {
         _gameTree = new LinkedList<Player>();
         int playerNumber = 0;
@@ -385,14 +401,18 @@ public class Game {
         _gameTree.add(_dealer);
     }
 
+    /** Shuffles the game deck. Occurs at the penetration level,
+     * below if a hand is still in progress or at 0 when the
+     * deck finishes while being dealt. **/
     private void shuffle() {
+        System.out.println("Shuffling the deck!");
         if (_gameDeck.size() == _penetration
                 || _gameDeck.size() == 0
                 || _gameDeck.size() < _penetration) {
             _gameDeck = _deck.getRandomDeck();
         }
+        count = 0;
     }
-
 
     /** Configures the additive cards. **/
     private void adderCards() {
@@ -418,13 +438,12 @@ public class Game {
     private ArrayList<String> _addOneCards = new ArrayList<>();
     /** A list of cards that subtract 1 from count. **/
     private ArrayList<String> _subtractOneCards = new ArrayList<>();
-
+    /** A map of winners, losers and break-evens after each hand. **/
     private HashMap<String, ArrayList<Player>> _winnersAndLosers = new HashMap<>();
-
+    /** A map of where player stands during a hand. **/
     private HashMap<Player, String> _playerStands = new HashMap<>();
-
+    /** A map of a player and the list of card currently holding. **/
     private HashMap<Player, ArrayList<Card>> _playerCards = new HashMap<>();
-
     /** The game dealer. **/
     private Dealer _dealer;
     /** The Turn of the player. **/
@@ -439,27 +458,27 @@ public class Game {
     private Deck _deck;
     /** Current count of the cards. Initialized at 0. **/
     private int count = 0;
-
+    /** Penetration level of the current deck. **/
     private int _penetration;
-
+    /** Variable containing the String hit. **/
     private final String _hit = "hit";
-
+    /** Variable containing the String stand. **/
     private final String _stand = "stand";
-
+    /** Variable containing the String split **/
     private final String _split = "split";
-
+    /** Variable containing the String double. **/
     private final String _double = "double";
-
+    /** Variable containing the String don't split. **/
     private final String _notsplit = "don't split";
-
+    /** Variable containing the String surrender. **/
     private final String _surrender = "surrender";
-
+    /** Variable containing the String bust. **/
     private final String _bust = "bust";
-
+    /** Variable containing the String blackjack. **/
     private final String _blackjack = "blackjack";
-
+    /** A boolean corresponding whether the dealer is suspense/dealing card to players. **/
     private Boolean _suspense = false;
-
+    /** An inputted result of the playing result, corresponds to decision during the game. **/
     private String _playerChoice;
 
 

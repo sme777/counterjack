@@ -16,7 +16,7 @@ public class Deck {
     }
 
     /** Generates an organized deck. **/
-    public void generateOrganizedDeck() {
+    private void generateOrganizedDeck() {
         for (int n = numberOfDeck; n > 0; n--) {
             for (int i = 0; i < suits.length; i++) {
                 for (int v = 0; v < card.length; v++) {
@@ -28,7 +28,7 @@ public class Deck {
     }
 
     /** Generates a random deck. **/
-    public void generateRandomDeck() {
+    private void generateRandomDeck() {
         if (organizedDeck.size() == 0) {
             getOrganizedDeck();
         }
@@ -43,18 +43,26 @@ public class Deck {
         }
     }
 
-    void setCardPenetration() {
+    /** Sets the penetration card randomly with some penetration heuristic. **/
+    private void setCardPenetration() {
         Random random = new Random();
         int minimumCards = (int) penetrationHeuristic * numberOfDeck * numberOfCards;
         penetrationPosition = random.nextInt(numberOfDeck * numberOfCards - minimumCards)
                 + minimumCards;
     }
 
-    int getPenetrationPosition() {
+    /** A getter for the penetration placement in the deck.
+     * @return integer value of the position where to split. **/
+    public int getPenetrationPosition() {
         setCardPenetration();
         return penetrationPosition;
     }
 
+    /** A getter for the number of decks in the shoe.
+     * @return the number of decks in a shoe. **/
+    public int getNumberOfDeck() {
+        return numberOfDeck;
+    }
 
     /** Returns a generated organized deck.
      * @return an arraylist of cards. **/
@@ -72,7 +80,8 @@ public class Deck {
 
 
     /** An array of cards, regardless of suits. **/
-    private final String[] card = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+    private final String[] card = {"2", "3", "4", "5", "6", "7",
+                                   "8", "9", "10", "J", "Q", "K", "A"};
     /** An array of suits, with the first letter of the suit. **/
     private final String[] suits = {"D", "S", "C", "H"};
     /** An arraylist of and organized deck. **/

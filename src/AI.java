@@ -1,7 +1,6 @@
-import java.awt.image.AreaAveragingScaleFilter;
 import java.util.ArrayList;
 
-public class AI extends Player{
+public class AI extends Player {
 
     /** Constructor of AI.
      * @param doubleAfterSplit configure
@@ -16,16 +15,15 @@ public class AI extends Player{
     public String move() {
         if (_dealer.size() == 0) {
             return null;
-        } else if (_ai.size() == 2 && _ai.get(0) == _ai.get(1)) {
+        } else if (_ai.size() == 2 && _ai.get(0).getFace().equals(_ai.get(1).getFace())) {
             return splitHelper();
         } else if (_ai.size() == 2 && isASoftHand()) {
-                if (surrenderHelper()) {
-                    return "surrender";
-                } else {
-                    return softHelper(_ai);
-                }
-        }
-        else {
+            if (surrenderHelper()) {
+                return "surrender";
+            } else {
+                return softHelper(_ai);
+            }
+        } else {
             if (surrenderHelper()) {
                 return "surrender";
             } else {
@@ -35,6 +33,7 @@ public class AI extends Player{
 
     }
 
+    /** Evaluates if the hand is soft i.e. includes ace(s). **/
     private Boolean isASoftHand() {
         for (Card c: _ai) {
             if (c.getFace().equals("A")) {
@@ -78,7 +77,6 @@ public class AI extends Player{
     private String splitHelper() {
         switch (_ai.get(0).getFace()) {
             case "A":
-
             case "8":
                 return split();
             case "K":
@@ -86,12 +84,14 @@ public class AI extends Player{
             case "J":
             case "10":
             case "5":
-                return notSplit();
+                notSplit();
+                return hardHelper(10);
             case "9":
                 if (dealerComparator("7") || dealerComparator("10")
                         || dealerComparator("A") || dealerComparator("J")
                         || dealerComparator("Q") || dealerComparator("K")) {
-                    return notSplit();
+                    notSplit();
+                    return hardHelper(18);
                 } else {
                     return split();
                 }
@@ -101,7 +101,8 @@ public class AI extends Player{
                         || dealerComparator("10") || dealerComparator("J")
                         || dealerComparator("Q") || dealerComparator("K")
                         || dealerComparator("A")) {
-                    return notSplit();
+                    notSplit();
+                    return hardHelper(14);
                 } else {
                     return split();
                 }
@@ -113,7 +114,8 @@ public class AI extends Player{
                         || dealerComparator("9") || dealerComparator("10")
                         || dealerComparator("J") || dealerComparator("Q")
                         || dealerComparator("K") || dealerComparator("A")) {
-                    return notSplit();
+                    notSplit();
+                    return hardHelper(12);
                 } else {
                     return split();
                 }
@@ -122,12 +124,25 @@ public class AI extends Player{
                     if (dealerComparator("5") || dealerComparator("6")) {
                         return split();
                     } else {
-                        return notSplit();
+                        notSplit();
+                        return hardHelper(8);
                     }
                 } else {
-                    return notSplit();
+                    notSplit();
+                    return hardHelper(8);
                 }
             case "3":
+                if (_doubleAfterSplit && (dealerComparator("2")
+                        || dealerComparator("3"))) {
+                    return split();
+                }
+                if (dealerComparator("4") || dealerComparator("5")
+                        || dealerComparator("6") || dealerComparator("7")) {
+                    return split();
+                } else {
+                    notSplit();
+                    return hardHelper(6);
+                }
             case "2":
                 if (_doubleAfterSplit && (dealerComparator("2")
                         || dealerComparator("3"))) {
@@ -137,7 +152,8 @@ public class AI extends Player{
                         || dealerComparator("6") || dealerComparator("7")) {
                     return split();
                 } else {
-                    return notSplit();
+                    notSplit();
+                    hardHelper(4);
                 }
             default:
                 System.out.println("Wrong config.");
@@ -167,7 +183,7 @@ public class AI extends Player{
                 } else {
                     return doubleHand();
                 }
-            } else if (aiComparator("6",0) || aiComparator("6", 1)) {
+            } else if (aiComparator("6", 0) || aiComparator("6", 1)) {
                 if (dealerComparator("3") || dealerComparator("4")
                         || dealerComparator("5") || dealerComparator("6")) {
                     return doubleHand();
@@ -202,7 +218,7 @@ public class AI extends Player{
                 return blackjack();
             }
         } else {
-            ArrayList <Card> aces = new ArrayList<>();
+            ArrayList<Card> aces = new ArrayList<>();
             int score = 0;
             for (Card c: _ai) {
                 if (!c.getFace().equals("A")) {
@@ -271,10 +287,10 @@ public class AI extends Player{
      * based on the fact that the hand is hard. Calls the necessary
      * function based on perfect strategy. **/
     private String hardHelper(int value) {
-        int handCount = value;
-        if (handCount == 17) {
+
+        if (value == 17) {
             return stand();
-        } else if (handCount == 16) {
+        } else if (value == 16) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
@@ -282,7 +298,7 @@ public class AI extends Player{
             } else {
                 return hit();
             }
-        } else if (handCount == 15) {
+        } else if (value == 15) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
@@ -290,7 +306,7 @@ public class AI extends Player{
             } else {
                 return hit();
             }
-        } else if (handCount == 14) {
+        } else if (value == 14) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
@@ -298,7 +314,7 @@ public class AI extends Player{
             } else {
                 return hit();
             }
-        } else if (handCount == 13) {
+        } else if (value == 13) {
             if (dealerComparator("2") || dealerComparator("3")
                     || dealerComparator("4") || dealerComparator("5")
                     || dealerComparator("6")) {
@@ -306,15 +322,15 @@ public class AI extends Player{
             } else {
                 return hit();
             }
-        } else if (handCount == 12) {
+        } else if (value == 12) {
             if (dealerComparator("4") || dealerComparator("5") || dealerComparator("6")) {
                 return stand();
             } else {
                 return hit();
             }
-        } else if (handCount == 11) {
+        } else if (value == 11) {
             return doubleHand();
-        } else if (handCount == 10) {
+        } else if (value == 10) {
             if (dealerComparator("10") || dealerComparator("J")
                     || dealerComparator("Q") || dealerComparator("K")
                     || dealerComparator("A")) {
@@ -322,19 +338,19 @@ public class AI extends Player{
             } else {
                 return doubleHand();
             }
-        } else if (handCount == 9) {
-            if (dealerComparator("3") || dealerComparator("4") ||
-                    dealerComparator("5") || dealerComparator("6")) {
+        } else if (value == 9) {
+            if (dealerComparator("3") || dealerComparator("4")
+                    || dealerComparator("5") || dealerComparator("6")) {
                 return doubleHand();
             } else {
                 return hit();
             }
-        } else if (handCount == 8) {
+        } else if (value == 8) {
             return hit();
-        } else if (handCount > 17) {
-            if (handCount == 21) {
+        } else if (value > 17) {
+            if (value == 21) {
                 return blackjack();
-            } else if (handCount > 21) {
+            } else if (value > 21) {
                 return bust();
             }
             return stand();
@@ -362,10 +378,6 @@ public class AI extends Player{
         }
     }
 
-    private void configureDestination() {
-
-    }
-
     /** Calculates the sum of the current hand.
      * @param array a given array list
      * @return value of hand sum. **/
@@ -389,6 +401,7 @@ public class AI extends Player{
     private Boolean dealerComparator(String k) {
         return _dealer.get(0).getFace().equals(k);
     }
+
     /** Compares the value of a card to a value of a
      * card in the hand at a specific index.
      * @param index of the card,
@@ -396,16 +409,20 @@ public class AI extends Player{
     private Boolean aiComparator(String k, int index) {
         return _ai.get(index).getFace().equals(k);
     }
+
+    /** The value returned when a player is in game and receives a card. **/
     @Override
     public String deal() {
-        return _name +" gets: ";
+        return _name + " gets: ";
     }
 
+    /** Overridden value of toString, changed to the name of the AI. **/
     @Override
     public String toString() {
-        return  _name ;
+        return  _name;
     }
 
+    /** Name of the AI. **/
     private String _name;
     /** A given game parameter, by default is true. **/
     private Boolean _doubleAfterSplit;
