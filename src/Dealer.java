@@ -5,8 +5,14 @@ public class Dealer extends Player{
     /** Constructs a new Dealer. **/
     public Dealer(String name) {
         super(name);
-        _name = name;
+
         _dealer = new ArrayList<>();
+    }
+
+    public Dealer(String name, double bank) {
+        super(name, bank);
+        _dealer = new ArrayList<>();
+
     }
 
     /** Initialize a dealer move. Occurs when
@@ -49,20 +55,7 @@ public class Dealer extends Player{
         }
         return sum;
     }
-    /** The value returned when a player is in game and receives a card. **/
-    @Override
-    public String deal() {
-        return _name + " gets: ";
-    }
 
-    /** Overridden value of toString, changed to the name of the Dealer. **/
-    @Override
-    public String toString() {
-        return _name;
-    }
-
-    /** The name of the Dealer. **/
-    private String _name;
     /** Number of cards a dealer has, initialized at 0.**/
     private int _numberOfCards = 0;
     /** A list of dealers Cards. **/

@@ -211,11 +211,27 @@ public class Game {
         System.out.println("This will split the pair and add a second hand for " + player.toString());
         if (player instanceof AI) {
             AI ai = (AI) player;
-            AI newAi = new AI(ai.toString() + ".2", true);
-            _gameTree.add(_gameTree.indexOf(ai) + 1, newAi);
+            AI newAi = new AI(ai.toString() + " Hand 2" , true);
+            ai.rename(ai.toString() + " Hand 1");
+            _gameTree.addFirst(newAi);
+            _ais.add(newAi);
+            Card splitCard = _playerCards.get(ai).remove(1);
+            ArrayList<Card> splitPlayerArray = new ArrayList<>();
+            splitPlayerArray.add(splitCard);
+            _playerCards.put(newAi, splitPlayerArray);
+            _playerStands.put(ai, _hit);
+            _playerStands.put(newAi, _hit);
         } else {
-            Player newPlayer = new Player(player.toString() + ".2");
+            Player newPlayer = new Player(player.toString() + " Hand 2");
+            player.rename(player.toString() + " Hand 1");
             _gameTree.add(_gameTree.indexOf(player) + 1, newPlayer);
+            _players.add(newPlayer);
+            Card splitCard = _playerCards.get(player).remove(1);
+            ArrayList<Card> splitPlayerArray = new ArrayList<>();
+            splitPlayerArray.add(splitCard);
+            _playerCards.put(newPlayer, splitPlayerArray);
+            _playerStands.put(newPlayer, _hit);
+            _playerStands.put(player, _hit);
         }
     }
 
@@ -230,7 +246,11 @@ public class Game {
         }
         if (currCount == _playerStands.size() - 1) {
             _suspense = !_suspense;
+
             while (_dealer.handSum() < 17) {
+                if (_gameDeck.size() == 0) {
+                    shuffle();
+                }
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
                 _dealer.hit();
@@ -373,6 +393,7 @@ public class Game {
         _playerCards = new HashMap<>();
         _dealer.removeAll();
         _turn = true;
+
         _drawingCard = null;
         _dealerCard = null;
         _playerChoice = null;

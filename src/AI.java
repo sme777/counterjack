@@ -7,8 +7,16 @@ public class AI extends Player {
      * if double after split is allowed. **/
     public AI(String name, Boolean doubleAfterSplit) {
         super(name);
-        _name = name;
+
         _doubleAfterSplit = doubleAfterSplit;
+
+    }
+
+    public AI(String name, Boolean doubleAfterSplit, double bankroll) {
+        super(name, bankroll);
+
+        _doubleAfterSplit = doubleAfterSplit;
+
     }
 
     /** The move the AI will make based on the heuristics of perfect startegy. **/
@@ -85,7 +93,7 @@ public class AI extends Player {
             case "10":
             case "5":
                 notSplit();
-                return hardHelper(10);
+                return hardHelper(20);
             case "9":
                 if (dealerComparator("7") || dealerComparator("10")
                         || dealerComparator("A") || dealerComparator("J")
@@ -410,22 +418,9 @@ public class AI extends Player {
         return _ai.get(index).getFace().equals(k);
     }
 
-    /** The value returned when a player is in game and receives a card. **/
-    @Override
-    public String deal() {
-        return _name + " gets: ";
-    }
-
-    /** Overridden value of toString, changed to the name of the AI. **/
-    @Override
-    public String toString() {
-        return  _name;
-    }
-
-    /** Name of the AI. **/
-    private String _name;
     /** A given game parameter, by default is true. **/
     private Boolean _doubleAfterSplit;
+
     /** A list of dealer cards. Logic is made from the first card only. **/
     private ArrayList<Card> _dealer = new ArrayList<>();
     /** A list of AI cards at the table. **/

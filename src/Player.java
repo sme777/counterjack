@@ -6,6 +6,13 @@ public class Player {
     public Player(String name) {
         playerHand = new ArrayList<>();
         _name = name;
+        _bankroll = 2000;
+    }
+
+    public Player(String name, double bankroll) {
+        playerHand = new ArrayList<>();
+        _name = name;
+        _bankroll = bankroll;
     }
 
     /** Add card to the hand. Occurs when
@@ -72,6 +79,18 @@ public class Player {
         return "blackjack";
     }
 
+    public void addToBankroll(double amount) {
+        _bankroll += amount;
+    }
+
+    public void subtractFromBankroll(double amount) {
+        _bankroll -= amount;
+    }
+
+    public double getBankroll() {
+        System.out.println(_bankroll);
+        return _bankroll;
+    }
     /** THe sum of the player's cards.
      * @return the accumulated value of player's card**/
     public int handSum() {
@@ -93,6 +112,10 @@ public class Player {
         return sum;
     }
 
+    public void rename(String newName) {
+        _name = newName;
+    }
+
     /** The value returned when a player is in game and receives a card. **/
     public String deal() {
         return _name + " gets: ";
@@ -108,4 +131,6 @@ public class Player {
     private ArrayList<Card> playerHand;
     /** The name of the Player. **/
     private String _name;
+
+    private double _bankroll;
 }
