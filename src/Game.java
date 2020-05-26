@@ -142,6 +142,7 @@ public class Game {
                         || _playerStands.get(aiPlayer).equals(_blackjack))) {
                     _drawingCard = _gameDeck.get(0);
                     _gameDeck.remove(0);
+                    _discardTray.add(_drawingCard);
                     System.out.println(ply.deal() + _drawingCard);
                     _currentTableCards.add(_drawingCard);
                     _playerCards.get(aiPlayer).add(_drawingCard);
@@ -153,6 +154,7 @@ public class Game {
             } else if (ply instanceof Dealer && !_suspense) {
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
+                _discardTray.add(_drawingCard);
                 System.out.println(ply.deal() + _drawingCard);
                 _currentTableCards.add(_drawingCard);
                 _playerCards.get(_dealer).add(_drawingCard);
@@ -193,6 +195,7 @@ public class Game {
                     || _playerStands.get(ply).equals(_blackjack))) {
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
+                _discardTray.add(_drawingCard);
                 System.out.println(ply.deal() + _drawingCard);
                 _currentTableCards.add(_drawingCard);
                 _playerCards.get(ply).add(_drawingCard);
@@ -253,6 +256,7 @@ public class Game {
                 }
                 _drawingCard = _gameDeck.get(0);
                 _gameDeck.remove(0);
+                _discardTray.add(_drawingCard);
                 _dealer.hit();
                 System.out.println(_dealer.deal() + _drawingCard);
                 _currentTableCards.add(_drawingCard);
@@ -427,6 +431,7 @@ public class Game {
      * deck finishes while being dealt. **/
     private void shuffle() {
         System.out.println("Shuffling the deck!");
+        _discardTray = new ArrayList<>();
         if (_gameDeck.size() == _penetration
                 || _gameDeck.size() == 0
                 || _gameDeck.size() < _penetration) {
@@ -459,6 +464,8 @@ public class Game {
     private ArrayList<String> _addOneCards = new ArrayList<>();
     /** A list of cards that subtract 1 from count. **/
     private ArrayList<String> _subtractOneCards = new ArrayList<>();
+    /** The discard tray for the game, before a shoe ends. **/
+    private ArrayList<Card> _discardTray = new ArrayList<>();
     /** A map of winners, losers and break-evens after each hand. **/
     private HashMap<String, ArrayList<Player>> _winnersAndLosers = new HashMap<>();
     /** A map of where player stands during a hand. **/
