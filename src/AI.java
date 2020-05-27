@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Random;
 
 public class AI extends Player {
 
@@ -9,14 +10,16 @@ public class AI extends Player {
         super(name);
 
         _doubleAfterSplit = doubleAfterSplit;
-
+        _betHeuristic = 0.01;
+        _bet = getBankroll() * _betHeuristic;
     }
 
     public AI(String name, Boolean doubleAfterSplit, double bankroll) {
         super(name, bankroll);
 
         _doubleAfterSplit = doubleAfterSplit;
-
+        _betHeuristic = 0.01;
+        _bet = getBankroll() * _betHeuristic;
     }
 
     /** The move the AI will make based on the heuristics of perfect startegy. **/
@@ -404,6 +407,22 @@ public class AI extends Player {
         return sum;
     }
 
+    public double bet() {
+        Random rand = new Random();
+        int count = _betChoice.length;
+        int actualBet = rand.nextInt(count);
+        _bet = _betChoice[actualBet] * _bet;
+        return _bet;
+    }
+
+    public double getBet() {
+        return _bet;
+    }
+
+    public void resetInitialBet() {
+        _bet = getBankroll() * _betHeuristic;
+    }
+
     /** Compares the value of a card to that of the dealer.
      * @param k the string value of the given card.  **/
     private Boolean dealerComparator(String k) {
@@ -425,4 +444,8 @@ public class AI extends Player {
     private ArrayList<Card> _dealer = new ArrayList<>();
     /** A list of AI cards at the table. **/
     private ArrayList<Card> _ai = new ArrayList<>();
+    //private double _bankroll;
+    private double _betHeuristic;
+    private double _bet;
+    private final int[] _betChoice = {1, 2, 3, 4, 5, 6};
 }

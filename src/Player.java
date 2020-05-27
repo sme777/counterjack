@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Player {
 
@@ -6,9 +7,12 @@ public class Player {
     public Player(String name) {
         playerHand = new ArrayList<>();
         _name = name;
-        _bankroll = 2000;
+        if (this instanceof Dealer) {
+            _bankroll = 50000;
+        } else {
+            _bankroll = 2000;
+        }
     }
-
     public Player(String name, double bankroll) {
         playerHand = new ArrayList<>();
         _name = name;
@@ -88,8 +92,17 @@ public class Player {
     }
 
     public double getBankroll() {
-        System.out.println(_bankroll);
+
         return _bankroll;
+    }
+
+    public double bet() {
+        //subtractFromBankroll(_bet);
+        return _bet;
+    }
+
+    public void setBet(double amount) {
+        _bet = amount;
     }
     /** THe sum of the player's cards.
      * @return the accumulated value of player's card**/
@@ -133,4 +146,6 @@ public class Player {
     private String _name;
 
     private double _bankroll;
+
+    private double _bet;
 }

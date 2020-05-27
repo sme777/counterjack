@@ -31,6 +31,10 @@ public class Game {
         _winnersAndLosers.put("winners", new ArrayList<Player>());
         _winnersAndLosers.put("losers", new ArrayList<Player>());
         _winnersAndLosers.put("break", new ArrayList<Player>());
+
+        _playerTurn.put(samplePlayer, 1);
+        _playerTurn.put(sampleAI, 1);
+        _payout = 1.5;
         subtractCards();
         adderCards();
     }
@@ -50,6 +54,7 @@ public class Game {
             _playerStands.put(samplePlayer, "hit");
             _gameTree.add(samplePlayer);
             _playerCards.put(samplePlayer, new ArrayList<Card>());
+            _playerTurn.put(samplePlayer, 1);
             players--;
 
         }
@@ -59,6 +64,7 @@ public class Game {
             _playerStands.put(sampleAI, "hit");
             _gameTree.add(sampleAI);
             _playerCards.put(sampleAI, new ArrayList<Card>());
+            _playerTurn.put(sampleAI, 1);
             ais--;
         }
 
@@ -70,7 +76,7 @@ public class Game {
         _winnersAndLosers.put("winners", new ArrayList<Player>());
         _winnersAndLosers.put("losers", new ArrayList<Player>());
         _winnersAndLosers.put("break", new ArrayList<Player>());
-
+        _payout = 1.5;
         adderCards();
         subtractCards();
     }
@@ -100,6 +106,7 @@ public class Game {
             recount();
             evaluateWinners();
             System.out.println(_winnersAndLosers);
+            printBankrolls();
             reset();
         }
         shuffle();
@@ -147,6 +154,12 @@ public class Game {
                     _currentTableCards.add(_drawingCard);
                     _playerCards.get(aiPlayer).add(_drawingCard);
                     aiPlayer.addCard(_drawingCard);
+                    if (_playerTurn.get(aiPlayer) == 1) {
+                        double aiBet = aiPlayer.bet();
+                        _betsThisRound.put(aiPlayer, aiBet);
+                        System.out.println(aiPlayer.toString() + " bets " + Math.round(aiBet) +"$");
+                    }
+                    _playerTurn.put(aiPlayer, _playerTurn.get(aiPlayer) + 1);
                     if (_dealerCard != null) {
                         aiPlayer.addDealerCard(_dealerCard);
                     }
@@ -179,9 +192,17 @@ public class Game {
                 }
             }
         }  else {
+
             Player ply = _gameTree.pop();
             _gameTree.add(ply);
             _turn = !_turn;
+            if (_playerTurn.get(ply) == 1) {
+                Scanner myObj = new Scanner(System.in);
+                System.out.println("Bet size: ");
+                _playerBet = Double.parseDouble(myObj.nextLine());
+                _betsThisRound.put(ply, _playerBet);
+            }
+            _playerTurn.put(ply, _playerTurn.get(ply) + 1);
             if (_playerChoice != null) {
                 try {
                     scannerInterpreter(ply, _playerChoice);
@@ -224,6 +245,9 @@ public class Game {
             _playerCards.put(newAi, splitPlayerArray);
             _playerStands.put(ai, _hit);
             _playerStands.put(newAi, _hit);
+            _playerTurn.put(newAi, 2);
+            _betsThisRound.put(newAi, ai.getBet());
+
         } else {
             Player newPlayer = new Player(player.toString() + " Hand 2");
             player.rename(player.toString() + " Hand 1");
@@ -235,6 +259,8 @@ public class Game {
             _playerCards.put(newPlayer, splitPlayerArray);
             _playerStands.put(newPlayer, _hit);
             _playerStands.put(player, _hit);
+            _playerTurn.put(newPlayer, 2);
+            _betsThisRound.put(newPlayer, _playerBet);
         }
     }
 
@@ -370,20 +396,45 @@ public class Game {
                 int dealerValue = count(_playerCards.get(_dealer));
                 if (handValue > dealerValue) {
                     if (handValue > 21) {
+
                         _winnersAndLosers.get("losers").add(player);
+                        player.subtractFromBankroll(_betsThisRound.get(player));
+                        _dealer.addToBankroll(_betsThisRound.get(player));
                     } else {
                         _winnersAndLosers.get("winners").add(player);
+                        if (count(_playerCards.get(player)) == 21) {
+                            player.addToBankroll(_betsThisRound.get(player) * _payout);
+                            _dealer.subtractFromBankroll(_betsThisRound.get(player) * _payout);
+                        } else {
+                            player.addToBankroll(_betsThisRound.get(player));
+                            _dealer.subtractFromBankroll(_betsThisRound.get(player));
+                        }
                     }
                 } else {
                     if (dealerValue > 21) {
                         _winnersAndLosers.get("winners").add(player);
+                        if (count(_playerCards.get(player)) == 21) {
+                            player.addToBankroll(_betsThisRound.get(player) * _payout);
+                            _dealer.subtractFromBankroll(_betsThisRound.get(player) * _payout);
+                        } else {
+                            player.addToBankroll(_betsThisRound.get(player));
+                            _dealer.subtractFromBankroll(_betsThisRound.get(player));
+                        }
                     } else if (dealerValue == handValue) {
                         _winnersAndLosers.get("break").add(player);
                     } else {
                         _winnersAndLosers.get("losers").add(player);
+                        player.subtractFromBankroll(_betsThisRound.get(player));
+                        _dealer.addToBankroll(_betsThisRound.get(player));
                     }
                 }
             }
+        }
+    }
+
+    private void printBankrolls() {
+        for (Player player: _playerCards.keySet()) {
+            System.out.println(player.toString() + " " + Math.round(player.getBankroll()));
         }
     }
 
@@ -394,6 +445,11 @@ public class Game {
         _winnersAndLosers.put("losers", new ArrayList<Player>());
         _winnersAndLosers.put("break", new ArrayList<Player>());
         _playerStands.replaceAll((p, v) -> _hit);
+        for (Player player: _playerCards.keySet()) {
+            if (player instanceof AI) {
+                ((AI) player).resetInitialBet();
+            }
+        }
         _playerCards = new HashMap<>();
         _dealer.removeAll();
         _turn = true;
@@ -401,6 +457,9 @@ public class Game {
         _drawingCard = null;
         _dealerCard = null;
         _playerChoice = null;
+        _playerTurn.replaceAll((p, v) -> 1);
+        _betsThisRound = new HashMap<>();
+
         reconstructGameTree();
 
     }
@@ -472,6 +531,8 @@ public class Game {
     private HashMap<Player, String> _playerStands = new HashMap<>();
     /** A map of a player and the list of card currently holding. **/
     private HashMap<Player, ArrayList<Card>> _playerCards = new HashMap<>();
+    private HashMap<Player, Integer> _playerTurn = new HashMap<>();
+    private HashMap<Player, Double> _betsThisRound = new HashMap<>();
     /** The game dealer. **/
     private Dealer _dealer;
     /** The Turn of the player. **/
@@ -508,6 +569,8 @@ public class Game {
     private Boolean _suspense = false;
     /** An inputted result of the playing result, corresponds to decision during the game. **/
     private String _playerChoice;
+    private double _playerBet;
+    private double _payout;
 
 
 }
