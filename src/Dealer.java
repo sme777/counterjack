@@ -4,13 +4,13 @@ public class Dealer extends Player{
 
     /** Constructs a new Dealer. **/
     public Dealer(String name) {
-        super(name);
+        super(name, false);
 
         _dealer = new ArrayList<>();
     }
 
     public Dealer(String name, double bank) {
-        super(name, bank);
+        super(name, bank, false);
         _dealer = new ArrayList<>();
 
     }

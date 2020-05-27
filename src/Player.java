@@ -4,8 +4,10 @@ import java.util.Random;
 public class Player {
 
     /** Constructs a new Player. **/
-    public Player(String name) {
+    public Player(String name, Boolean clone) {
+        _parent = this;
         playerHand = new ArrayList<>();
+        _isCloned = clone;
         _name = name;
         if (this instanceof Dealer) {
             _bankroll = 50000;
@@ -13,7 +15,29 @@ public class Player {
             _bankroll = 2000;
         }
     }
-    public Player(String name, double bankroll) {
+
+    public Player(String name, Boolean clone, Player parent) {
+        _parent = parent;
+        playerHand = new ArrayList<>();
+        _isCloned = clone;
+        _name = name;
+        if (this instanceof Dealer) {
+            _bankroll = 50000;
+        } else {
+            _bankroll = 2000;
+        }
+    }
+
+    public Player(String name, double bankroll, Boolean clone) {
+        _isCloned = clone;
+        playerHand = new ArrayList<>();
+        _name = name;
+        _bankroll = bankroll;
+    }
+
+    public Player(String name, double bankroll, Boolean clone, Player parent) {
+        _parent = parent;
+        _isCloned = clone;
         playerHand = new ArrayList<>();
         _name = name;
         _bankroll = bankroll;
@@ -104,6 +128,14 @@ public class Player {
     public void setBet(double amount) {
         _bet = amount;
     }
+
+    public Boolean isCloned() {
+        return _isCloned;
+    }
+
+    public Player getParent() {
+        return _parent;
+    }
     /** THe sum of the player's cards.
      * @return the accumulated value of player's card**/
     public int handSum() {
@@ -129,6 +161,17 @@ public class Player {
         _name = newName;
     }
 
+    public Boolean didSplit() {
+        return _didSplit;
+    }
+
+    public void changeDidSplit() {
+        _didSplit = true;
+    }
+
+    public double getBet() {
+        return _bet;
+    }
     /** The value returned when a player is in game and receives a card. **/
     public String deal() {
         return _name + " gets: ";
@@ -148,4 +191,10 @@ public class Player {
     private double _bankroll;
 
     private double _bet;
+
+    private Boolean _isCloned;
+
+    private Player _parent;
+
+    private Boolean _didSplit = false;
 }

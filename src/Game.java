@@ -10,8 +10,8 @@ public class Game {
         _gameDeck = deck.getRandomDeck();
         _turn = true;
         _penetration = _deck.getPenetrationPosition();
-        AI sampleAI = new AI("AI", true);
-        Player samplePlayer = new Player("User Player");
+        AI sampleAI = new AI("AI", true, false);
+        Player samplePlayer = new Player("User Player", false);
         _ais.add(sampleAI);
         _players.add(samplePlayer);
         _dealer = new Dealer("Dealer");
@@ -49,7 +49,7 @@ public class Game {
         _turn = true;
         _penetration = _deck.getPenetrationPosition();
         while (players > 0) {
-            Player samplePlayer = new Player("Player " + String.valueOf(players));
+            Player samplePlayer = new Player("Player " + String.valueOf(players), false);
             _players.add(samplePlayer);
             _playerStands.put(samplePlayer, "hit");
             _gameTree.add(samplePlayer);
@@ -59,7 +59,7 @@ public class Game {
 
         }
         while (ais > 0) {
-            AI sampleAI = new AI("AI " + String.valueOf(ais), true);
+            AI sampleAI = new AI("AI " + String.valueOf(ais), true, false);
             _ais.add(sampleAI);
             _playerStands.put(sampleAI, "hit");
             _gameTree.add(sampleAI);
@@ -131,7 +131,7 @@ public class Game {
             _gameTree.add(ply);
             if (ply instanceof AI) {
                 AI aiPlayer = (AI) ply;
-                if (_playerCards.get(aiPlayer).size() > 1) {
+                if (_playerCards.get(aiPlayer).size() > 1 || aiPlayer.didSplit()) {
                     String move = aiPlayer.move();
                     if (aiPlayer.handSum() > 21) {
                         _playerStands.put(aiPlayer, _bust);
@@ -147,6 +147,21 @@ public class Game {
                         || _playerStands.get(aiPlayer).equals(_surrender)
                         || _playerStands.get(aiPlayer).equals(_stand)
                         || _playerStands.get(aiPlayer).equals(_blackjack))) {
+                    if (_playerTurn.get(aiPlayer) == 1) {
+                        double aiBet = aiPlayer.bet();
+                        _betsThisRound.put(aiPlayer, aiBet);
+                        System.out.println(aiPlayer.toString() + " bets " + Math.round(aiBet) +"$");
+                    }
+                    if (_playerStands.get(aiPlayer).equals(_double)) {
+                        if (!aiPlayer.isCloned()) {
+                            _betsThisRound.put(aiPlayer, _betsThisRound.get(aiPlayer) * 2);
+                        } else {
+                            AI parent = (AI) aiPlayer.getParent();
+                            aiPlayer.setBet(_betsThisRound.get(parent));
+                            _betsThisRound.put(parent, _betsThisRound.get(parent) * 1.5);
+                        }
+                        System.out.println(aiPlayer.toString() + " bets double.");
+                    }
                     _drawingCard = _gameDeck.get(0);
                     _gameDeck.remove(0);
                     _discardTray.add(_drawingCard);
@@ -154,11 +169,7 @@ public class Game {
                     _currentTableCards.add(_drawingCard);
                     _playerCards.get(aiPlayer).add(_drawingCard);
                     aiPlayer.addCard(_drawingCard);
-                    if (_playerTurn.get(aiPlayer) == 1) {
-                        double aiBet = aiPlayer.bet();
-                        _betsThisRound.put(aiPlayer, aiBet);
-                        System.out.println(aiPlayer.toString() + " bets " + Math.round(aiBet) +"$");
-                    }
+
                     _playerTurn.put(aiPlayer, _playerTurn.get(aiPlayer) + 1);
                     if (_dealerCard != null) {
                         aiPlayer.addDealerCard(_dealerCard);
@@ -235,24 +246,32 @@ public class Game {
         System.out.println("This will split the pair and add a second hand for " + player.toString());
         if (player instanceof AI) {
             AI ai = (AI) player;
-            AI newAi = new AI(ai.toString() + " Hand 2" , true);
+            AI newAi = new AI(ai.toString() + " Hand 2" , true, true, ai);
             ai.rename(ai.toString() + " Hand 1");
+            ai.changeDidSplit();
+            newAi.changeDidSplit();
+
             _gameTree.addFirst(newAi);
             _ais.add(newAi);
+
             Card splitCard = _playerCards.get(ai).remove(1);
             ArrayList<Card> splitPlayerArray = new ArrayList<>();
             splitPlayerArray.add(splitCard);
+
             _playerCards.put(newAi, splitPlayerArray);
             _playerStands.put(ai, _hit);
             _playerStands.put(newAi, _hit);
+
             _playerTurn.put(newAi, 2);
-            _betsThisRound.put(newAi, ai.getBet());
+            _betsThisRound.put(ai, _betsThisRound.get(ai) * 2);
 
         } else {
-            Player newPlayer = new Player(player.toString() + " Hand 2");
+            Player newPlayer = new Player(player.toString() + " Hand 2", true, player);
             player.rename(player.toString() + " Hand 1");
             _gameTree.add(_gameTree.indexOf(player) + 1, newPlayer);
             _players.add(newPlayer);
+            player.changeDidSplit();
+            newPlayer.changeDidSplit();
             Card splitCard = _playerCards.get(player).remove(1);
             ArrayList<Card> splitPlayerArray = new ArrayList<>();
             splitPlayerArray.add(splitCard);
@@ -398,34 +417,51 @@ public class Game {
                     if (handValue > 21) {
 
                         _winnersAndLosers.get("losers").add(player);
-                        player.subtractFromBankroll(_betsThisRound.get(player));
-                        _dealer.addToBankroll(_betsThisRound.get(player));
+                        if (!player.isCloned()) {
+                            player.subtractFromBankroll(_betsThisRound.get(player));
+                            _dealer.addToBankroll(_betsThisRound.get(player));
+                        } else {
+                            Player parent = player.getParent();
+                            parent.subtractFromBankroll(player.getBet());
+                            _dealer.addToBankroll(player.getBet());
+
+                        }
                     } else {
                         _winnersAndLosers.get("winners").add(player);
-                        if (count(_playerCards.get(player)) == 21) {
-                            player.addToBankroll(_betsThisRound.get(player) * _payout);
-                            _dealer.subtractFromBankroll(_betsThisRound.get(player) * _payout);
-                        } else {
-                            player.addToBankroll(_betsThisRound.get(player));
-                            _dealer.subtractFromBankroll(_betsThisRound.get(player));
+                        if (!player.isCloned()) {
+                            if (count(_playerCards.get(player)) == 21) {
+                                player.addToBankroll(_betsThisRound.get(player) * _payout);
+                                _dealer.subtractFromBankroll(_betsThisRound.get(player) * _payout);
+                            } else {
+                                player.addToBankroll(_betsThisRound.get(player));
+                                _dealer.subtractFromBankroll(_betsThisRound.get(player));
+                            }
                         }
                     }
                 } else {
                     if (dealerValue > 21) {
                         _winnersAndLosers.get("winners").add(player);
-                        if (count(_playerCards.get(player)) == 21) {
-                            player.addToBankroll(_betsThisRound.get(player) * _payout);
-                            _dealer.subtractFromBankroll(_betsThisRound.get(player) * _payout);
-                        } else {
-                            player.addToBankroll(_betsThisRound.get(player));
-                            _dealer.subtractFromBankroll(_betsThisRound.get(player));
+                        if (!player.isCloned()) {
+                            if (count(_playerCards.get(player)) == 21) {
+                                player.addToBankroll(_betsThisRound.get(player) * _payout);
+                                _dealer.subtractFromBankroll(_betsThisRound.get(player) * _payout);
+                            } else {
+                                player.addToBankroll(_betsThisRound.get(player));
+                                _dealer.subtractFromBankroll(_betsThisRound.get(player));
+                            }
                         }
                     } else if (dealerValue == handValue) {
                         _winnersAndLosers.get("break").add(player);
                     } else {
                         _winnersAndLosers.get("losers").add(player);
-                        player.subtractFromBankroll(_betsThisRound.get(player));
-                        _dealer.addToBankroll(_betsThisRound.get(player));
+                        if (!player.isCloned()) {
+                            player.subtractFromBankroll(_betsThisRound.get(player));
+                            _dealer.addToBankroll(_betsThisRound.get(player));
+                        } else {
+                            Player parent = player.getParent();
+                            parent.subtractFromBankroll(player.getBet());
+                            _dealer.addToBankroll(player.getBet());
+                        }
                     }
                 }
             }

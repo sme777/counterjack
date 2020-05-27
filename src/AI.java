@@ -6,20 +6,40 @@ public class AI extends Player {
     /** Constructor of AI.
      * @param doubleAfterSplit configure
      * if double after split is allowed. **/
-    public AI(String name, Boolean doubleAfterSplit) {
-        super(name);
+    public AI(String name, Boolean doubleAfterSplit, Boolean clone) {
+        super(name, clone);
 
         _doubleAfterSplit = doubleAfterSplit;
         _betHeuristic = 0.01;
         _bet = getBankroll() * _betHeuristic;
+
     }
 
-    public AI(String name, Boolean doubleAfterSplit, double bankroll) {
-        super(name, bankroll);
+    public AI(String name, Boolean doubleAfterSplit, Boolean clone, AI parent) {
+        super(name, clone, parent);
 
         _doubleAfterSplit = doubleAfterSplit;
         _betHeuristic = 0.01;
         _bet = getBankroll() * _betHeuristic;
+
+    }
+
+    public AI(String name, Boolean doubleAfterSplit, double bankroll, Boolean clone) {
+        super(name, bankroll, clone);
+
+        _doubleAfterSplit = doubleAfterSplit;
+        _betHeuristic = 0.01;
+        _bet = getBankroll() * _betHeuristic;
+
+    }
+
+    public AI(String name, Boolean doubleAfterSplit, double bankroll, Boolean clone, AI parent) {
+        super(name, bankroll, clone, parent);
+
+        _doubleAfterSplit = doubleAfterSplit;
+        _betHeuristic = 0.01;
+        _bet = getBankroll() * _betHeuristic;
+
     }
 
     /** The move the AI will make based on the heuristics of perfect startegy. **/
@@ -415,6 +435,7 @@ public class AI extends Player {
         return _bet;
     }
 
+
     public double getBet() {
         return _bet;
     }
@@ -448,4 +469,5 @@ public class AI extends Player {
     private double _betHeuristic;
     private double _bet;
     private final int[] _betChoice = {1, 2, 3, 4, 5, 6};
+
 }
