@@ -10,12 +10,13 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="788.0" prefWidth="1041.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <top>
@@ -244,6 +245,51 @@
       </VBox>
    </right>
    <center>
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #2b580c;" BorderPane.alignment="CENTER" />
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #2b580c;" BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefHeight="75.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <ImageView fitHeight="75.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                     <HBox.margin>
+                        <Insets right="170.0" />
+                     </HBox.margin>
+                     <image>
+                        <Image url="@../../../OneDrive/Desktop/discardtray.jpg" />
+                     </image>
+                  </ImageView>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <ImageView fitHeight="50.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../OneDrive/Desktop/dealer.jpg" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="50.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <image>
+                              <Image url="@../../../OneDrive/Desktop/dealerChips.jpg" />
+                           </image>
+                        </ImageView>
+                     </children>
+                     <HBox.margin>
+                        <Insets left="170.0" right="170.0" />
+                     </HBox.margin>
+                  </VBox>
+                  <ImageView fitHeight="75.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../OneDrive/Desktop/card.png" />
+                     </image>
+                     <HBox.margin>
+                        <Insets left="170.0" />
+                     </HBox.margin>
+                  </ImageView>
+               </children>
+            </HBox>
+            <HBox prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+            <VBox prefHeight="200.0" prefWidth="150.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="150.0" />
+            <VBox prefHeight="200.0" prefWidth="150.0" AnchorPane.bottomAnchor="150.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="150.0" />
+         </children></AnchorPane>
    </center>
 </BorderPane>
